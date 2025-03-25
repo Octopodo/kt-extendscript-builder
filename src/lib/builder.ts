@@ -20,7 +20,9 @@ export async function buildExtendScript(options: BuildOptions): Promise<void> {
     watch: watchMode,
     clean,
     useTemplateTsconfig = false,
-    customPonyfills
+    customPonyfills,
+    destApp,
+    appVersion
   } = options;
 
   const outDir = path.dirname(output);
@@ -39,6 +41,13 @@ export async function buildExtendScript(options: BuildOptions): Promise<void> {
     const templateName = isTestMode
       ? 'tsconfig.tests.es3.json'
       : 'tsconfig.es3.json';
+
+    if (destApp && appVersion) {
+      // Modificar configuración para incluir app y versión
+      templateConfig.compilerOptions.types.push(
+        `types-for-adobe/${destApp}/${appVersion}`
+      );
+    }
 
     console.log('Compilando TypeScript usando configuración de plantilla');
 

@@ -14,4 +14,6 @@ export interface BuildOptions {
   clean: boolean;
   useTemplateTsconfig?: boolean;
   customPonyfills?: string;
+  destApp?: string;
+  appVersion?: string;
 }

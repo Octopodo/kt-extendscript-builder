@@ -93,6 +93,15 @@ const argv = yargs(hideBin(process.argv))
     type: 'string',
     description: 'Ruta a un archivo de ponyfills personalizados'
   })
+  .option('dest-app', {
+    type: 'string',
+    description: 'Adobe app destination'
+  })
+  .option('app-version', {
+    type: 'string',
+    description: 'Adobe app version'
+  })
+
   .help()
   .parseSync();
 
@@ -129,7 +138,10 @@ const buildOptions: BuildOptions = {
       ? argv['use-template']
       : fileConfig.useTemplateTsconfig) || false,
   customPonyfills:
-    (argv['custom-ponyfills'] as string) || fileConfig.customPonyfills
+    (argv['custom-ponyfills'] as string) || fileConfig.customPonyfills,
+  destApp: (argv['dest-app'] as string) || fileConfig.destApp || undefined,
+  appVersion:
+    (argv['app-version'] as string) || fileConfig.appVersion || undefined
 };
 
 // Construir
