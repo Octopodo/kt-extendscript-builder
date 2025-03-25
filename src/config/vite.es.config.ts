@@ -119,9 +119,14 @@ export function extendscriptConfig(
     });
   }
 
-  if (isProduction) {
-    build();
-  } else {
-    watchRollup();
-  }
+  // if (isProduction) {
+  //   build();
+  // } else {
+  //   watchRollup();
+  // }
+  return {
+    build,
+    watch: watchRollup,
+    config
+  };
 }

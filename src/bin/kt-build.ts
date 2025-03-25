@@ -120,29 +120,29 @@ if (!tsconfigPath && fileConfig.tsconfig) {
   tsconfigPath = 'tsconfig.tests.json';
 }
 
-// Combinar configuraciones (CLI tiene prioridad sobre archivo)
+// Combinar configuraciones priorizando archivo de configuración sobre CLI
 const buildOptions: BuildOptions = {
-  input: (argv.input as string) || fileConfig.input || 'src/index.ts',
-  output: (argv.output as string) || fileConfig.output || 'dist/index.js',
+  input: fileConfig.input ?? (argv.input as string) ?? 'src/index.ts',
+  output: fileConfig.output ?? (argv.output as string) ?? 'dist/index.js',
   tsconfig: tsconfigPath,
   watch:
-    (typeof argv.watch === 'boolean' ? argv.watch : fileConfig.watch) || false,
+    fileConfig.watch ?? (typeof argv.watch === 'boolean' ? argv.watch : false),
   mode:
-    (argv.mode as 'production' | 'development') ||
-    fileConfig.mode ||
+    fileConfig.mode ??
+    (argv.mode as 'production' | 'development') ??
     'production',
   clean:
-    (typeof argv.clean === 'boolean' ? argv.clean : fileConfig.clean) || true,
+    fileConfig.clean ?? (typeof argv.clean === 'boolean' ? argv.clean : true),
   useTemplateTsconfig:
-    (typeof argv['use-template'] === 'boolean'
-      ? argv['use-template']
-      : fileConfig.useTemplateTsconfig) || false,
+    fileConfig.useTemplateTsconfig ??
+    (typeof argv['use-template'] === 'boolean' ? argv['use-template'] : false),
   customPonyfills:
-    (argv['custom-ponyfills'] as string) || fileConfig.customPonyfills,
-  destApp: (argv['dest-app'] as string) || fileConfig.destApp || undefined,
-  appVersion:
-    (argv['app-version'] as string) || fileConfig.appVersion || undefined
+    fileConfig.customPonyfills ?? (argv['custom-ponyfills'] as string),
+  destApp: fileConfig.destApp ?? (argv['dest-app'] as string),
+  appVersion: fileConfig.appVersion ?? (argv['app-version'] as string)
 };
+
+console.log('Configuración de construcción:', buildOptions);
 
 // Construir
 buildExtendScript(buildOptions);

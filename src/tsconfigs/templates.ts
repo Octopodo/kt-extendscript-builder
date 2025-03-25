@@ -16,8 +16,8 @@ export const tsconfigES3 = {
       'types-for-adobe/shared/global',
       'types-for-adobe/shared/JavaScript'
     ]
-  },
-  include: ['src']
+  }
+  // include: ['src']
 };
 
 export const tsconfigTestsES3 = {

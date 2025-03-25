@@ -60,9 +60,10 @@ export async function buildExtendScript(options: BuildOptions): Promise<void> {
       compilerOptions: {
         ...templateConfig.compilerOptions,
         outDir,
-        // No establecemos rootDir, dejamos que TypeScript lo infiera
-        rootDir: undefined
-      }
+        rootDir: path.dirname(input)
+      },
+      include: [input], // Solo incluir el archivo de entrada
+      files: [input] // Asegurar que solo se compile este archivo
     };
 
     fs.writeFileSync(tempConfigPath, JSON.stringify(configToWrite, null, 2));
@@ -126,6 +127,16 @@ export async function buildExtendScript(options: BuildOptions): Promise<void> {
       ...viteConfig,
       configFile: false
     });
+
+    // Ejecutar explícitamente el build de ExtendScript
+    if ((viteConfig as any).extendScriptConfig) {
+      console.log('Ejecutando proceso final de ExtendScript...');
+      if (watchMode) {
+        await (viteConfig as any).extendScriptConfig.watchRollup();
+      } else {
+        await (viteConfig as any).extendScriptConfig.build();
+      }
+    }
 
     console.log('Build completada exitosamente');
   } catch (error) {
