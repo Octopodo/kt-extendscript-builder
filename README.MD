@@ -75,6 +75,33 @@ npx kt-build dev     # Uses dev config
 npx kt-build test    # Uses test config
 ```
 
+### Package.json Integration
+
+You can easily integrate KT ExtendScript Builder into your npm scripts:
+
+```json
+{
+  "name": "your-extendscript-project",
+  "scripts": {
+    "build": "kt-build",
+    "dev": "kt-build dev",
+    "test": "kt-build test",
+    "clean": "kt-build --clean"
+  },
+  "devDependencies": {
+    "kt-extendscript-builder": "^1.0.0"
+  }
+}
+```
+
+Then simply run with npm:
+
+```bash
+npm run build        # Production build
+npm run dev          # Development mode with watching
+npm run test         # Build tests
+```
+
 ### TypeScript Configuration
 
 KT ExtendScript Builder provides built-in TypeScript templates specifically configured for ExtendScript compatibility. These templates target ES3 and include the necessary type definitions for Adobe Creative Cloud applications.
