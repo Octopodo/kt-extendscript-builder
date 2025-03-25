@@ -1,5 +1,5 @@
 import { defineConfig, UserConfig } from 'vite';
-import * as nodePath from 'path'; // Importación modificada para evitar conflictos
+import * as nodePath from 'path'; // Modified import to avoid conflicts
 import { extendscriptConfig } from './vite.es.config';
 interface ExtendedUserConfig extends UserConfig {
   extendScriptConfig?: any;
@@ -13,17 +13,17 @@ export function createViteConfig(options: {
 }) {
   const { input, outDir, watch: watchMode, mode, customPonyfills } = options;
 
-  // Usar la importación modificada
+  // Use the modified import
   const inputFileName = nodePath.basename(input);
   const inputExt = nodePath.extname(input);
   const nameWithoutExt = inputFileName.replace(inputExt, '');
 
   const extensions = ['.js', '.ts', '.tsx'];
-  // Usar el nombre del archivo de entrada para el archivo de salida
+  // Use the input filename for the output file
   const outPathExtendscript = nodePath.join(outDir, `${nameWithoutExt}.js`);
   const isProduction = mode === 'production';
 
-  console.log('Configuración Vite:', {
+  console.log('Vite Configuration:', {
     input,
     outDir,
     outPathExtendscript,
@@ -31,7 +31,7 @@ export function createViteConfig(options: {
     mode
   });
 
-  // Configurar Vite
+  // Configure Vite
   const config: ExtendedUserConfig = {
     build: {
       minify: false,
@@ -46,7 +46,7 @@ export function createViteConfig(options: {
     }
   };
 
-  // Invocar configuración de ExtendScript
+  // Invoke ExtendScript configuration
   const esConfig = extendscriptConfig(
     input,
     outPathExtendscript,

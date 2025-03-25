@@ -1,10 +1,10 @@
-// Estructura del archivo kt-config.json
+// Structure of the kt-config.json file
 export interface KTConfig {
-  default?: BuildOptions; // Configuración por defecto
-  [configName: string]: BuildOptions | undefined; // Configuraciones con nombre
+  default?: BuildOptions; // Default configuration
+  [configName: string]: BuildOptions | undefined; // Named configurations
 }
 
-// BuildOptions incluye el campo tsconfig opcional
+// BuildOptions includes the optional tsconfig field
 export interface BuildOptions {
   input: string;
   output: string;

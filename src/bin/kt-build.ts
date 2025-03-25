@@ -6,13 +6,13 @@ import { BuildOptions } from '../lib/BuildOptions';
 import path from 'path';
 import fs from 'fs';
 
-// Interfaz para el archivo de configuración
+// Interface for the configuration file
 interface KTConfig {
   default?: Partial<BuildOptions>;
   [configName: string]: Partial<BuildOptions> | undefined;
 }
 
-// Función para leer el archivo de configuración
+// Function to read the configuration file
 export function loadConfig(configName?: string): Partial<BuildOptions> {
   const configPath = path.join(process.cwd(), 'kt-config.json');
 
@@ -22,76 +22,76 @@ export function loadConfig(configName?: string): Partial<BuildOptions> {
         fs.readFileSync(configPath, 'utf-8')
       ) as KTConfig;
 
-      // Si se especificó un nombre de configuración, usar esa configuración
+      // If a configuration name was specified, use that configuration
       if (configName && config[configName]) {
-        console.log(`Usando configuración "${configName}" de kt-config.json`);
+        console.log(`Using configuration "${configName}" from kt-config.json`);
         return config[configName];
       }
 
-      // Si existe configuración por defecto, usarla
+      // If default configuration exists, use it
       if (config.default) {
-        console.log('Usando configuración "default" de kt-config.json');
+        console.log('Using "default" configuration from kt-config.json');
         return config.default;
       }
     } catch (error) {
-      console.error('Error al leer el archivo kt-config.json:', error);
+      console.error('Error reading kt-config.json file:', error);
     }
   }
 
   return {};
 }
 
-// Procesar argumentos con yargs
+// Process arguments with yargs
 const argv = yargs(hideBin(process.argv))
   .option('input', {
     alias: 'i',
     type: 'string',
-    description: 'Archivo de entrada',
+    description: 'Input file',
     default: 'src/index.ts'
   })
   .option('output', {
     alias: 'o',
     type: 'string',
-    description: 'Ruta de salida del archivo',
+    description: 'Output file path',
     default: 'dist/index.js'
   })
   .option('test', {
     alias: 't',
     type: 'boolean',
-    description: 'Construir tests',
+    description: 'Build tests',
     default: false
   })
   .option('watch', {
     alias: 'w',
     type: 'boolean',
-    description: 'Modo watch',
+    description: 'Watch mode',
     default: false
   })
   .option('mode', {
     alias: 'm',
     type: 'string',
-    description: 'Modo de construcción',
+    description: 'Build mode',
     default: 'production',
     choices: ['production', 'development'] as const
   })
   .option('tsconfig', {
     type: 'string',
-    description: 'Ruta al archivo tsconfig'
+    description: 'Path to tsconfig file'
   })
   .option('use-template', {
     type: 'boolean',
-    description: 'Usar plantilla de tsconfig incluida en el paquete',
+    description: 'Use tsconfig template included in the package',
     default: false
   })
   .option('clean', {
     alias: 'c',
     type: 'boolean',
-    description: 'Limpiar directorio de salida',
+    description: 'Clean output directory',
     default: true
   })
   .option('custom-ponyfills', {
     type: 'string',
-    description: 'Ruta a un archivo de ponyfills personalizados'
+    description: 'Path to a custom ponyfills file'
   })
   .option('dest-app', {
     type: 'string',
@@ -105,14 +105,14 @@ const argv = yargs(hideBin(process.argv))
   .help()
   .parseSync();
 
-// Revisar si el primer argumento es un nombre de configuración
+// Check if the first argument is a configuration name
 const possibleConfigName = process.argv[2];
 const isConfigName = possibleConfigName && !possibleConfigName.startsWith('-');
 
-// Cargar configuración del archivo
+// Load configuration from file
 const fileConfig = loadConfig(isConfigName ? possibleConfigName : undefined);
 
-// Determinar tsconfig (prioridad: CLI > config file > default test)
+// Determine tsconfig (priority: CLI > config file > default test)
 let tsconfigPath = argv.tsconfig as string;
 if (!tsconfigPath && fileConfig.tsconfig) {
   tsconfigPath = fileConfig.tsconfig;
@@ -120,7 +120,7 @@ if (!tsconfigPath && fileConfig.tsconfig) {
   tsconfigPath = 'tsconfig.tests.json';
 }
 
-// Combinar configuraciones priorizando archivo de configuración sobre CLI
+// Combine configurations prioritizing configuration file over CLI
 const buildOptions: BuildOptions = {
   input: fileConfig.input ?? (argv.input as string) ?? 'src/index.ts',
   output: fileConfig.output ?? (argv.output as string) ?? 'dist/index.js',
@@ -142,7 +142,7 @@ const buildOptions: BuildOptions = {
   appVersion: fileConfig.appVersion ?? (argv['app-version'] as string)
 };
 
-console.log('Configuración de construcción:', buildOptions);
+console.log('Build configuration:', buildOptions);
 
-// Construir
+// Build
 buildExtendScript(buildOptions);

@@ -15,7 +15,7 @@ export function extendscriptConfig(
   customPonyfillsPath?: string
 ) {
   console.log(
-    `Configurando Rollup para ExtendScript: ${extendscriptEntry} -> ${outPath}`
+    `Configuring Rollup for ExtendScript: ${extendscriptEntry} -> ${outPath}`
   );
 
   const allPonyfills = loadCustomPonyfills(customPonyfillsPath);
@@ -66,7 +66,7 @@ export function extendscriptConfig(
           for (const fileName of Object.keys(bundle)) {
             const chunk = bundle[fileName];
             if (chunk.type === 'chunk') {
-              // Modifica el código del archivo final
+              // Modify the final file code
               chunk.code = chunk.code.replace(
                 /(^|\n)\s*export\s+(default\s+)?({[^}]+}|\w+\s*(=|\([^)]*\))?.*?(;|\n|$)|class\s+\w+\s*{[\s\S]*?}|\s*function\s+\w+\s*\([^)]*\)\s*{[\s\S]*?});/g,
                 '$1'
@@ -83,10 +83,10 @@ export function extendscriptConfig(
       const bundle = await rollup(config);
       await bundle.write(config.output as OutputOptions);
       await bundle.close();
-      console.log(`ExtendScript build completada: ${outPath}`);
+      console.log(`ExtendScript build completed: ${outPath}`);
     } catch (error) {
-      console.error('Error en build ExtendScript:', error);
-      // En lugar de lanzar el error, solo lo logueamos en tests
+      console.error('Error in ExtendScript build:', error);
+      // Instead of throwing the error, we just log it in tests
       if (process.env.NODE_ENV !== 'test') {
         throw error;
       }
@@ -98,22 +98,22 @@ export function extendscriptConfig(
     watcher.on('event', (event) => {
       switch (event.code) {
         case 'START':
-          console.log('Watcher iniciado...');
+          console.log('Watcher started...');
           break;
         case 'BUNDLE_START':
-          console.log('Reconstruyendo...');
+          console.log('Rebuilding...');
           break;
         case 'BUNDLE_END':
           event.result.write(config.output as OutputOptions).then(() => {
-            console.log('Archivo actualizado:', outPath);
+            console.log('File updated:', outPath);
             event.result.close();
           });
           break;
         case 'END':
-          console.log('Watch ciclo completo');
+          console.log('Watch cycle complete');
           break;
         case 'ERROR':
-          console.error('Error en watch:', event.error);
+          console.error('Error in watch:', event.error);
           break;
       }
     });

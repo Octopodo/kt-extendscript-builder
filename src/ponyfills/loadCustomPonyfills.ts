@@ -9,99 +9,95 @@ export interface PonyfillItem {
 }
 
 /**
- * Carga ponyfills personalizados desde un archivo y los combina con los ponyfills base
- * @param customPonyfillsPath Ruta al archivo de ponyfills personalizados
- * @returns Lista combinada de ponyfills base y personalizados
+ * Loads custom ponyfills from a file and combines them with base ponyfills
+ * @param customPonyfillsPath Path to the custom ponyfills file
+ * @returns Combined list of base and custom ponyfills
  */
 export function loadCustomPonyfills(
   customPonyfillsPath?: string
 ): PonyfillItem[] {
-  // Comenzar con los ponyfills base
+  // Start with base ponyfills
   let allPonyfills = [...basePonyfills];
 
-  // Si no se especificó ruta, devolver los ponyfills base
+  // If no path specified, return base ponyfills
   if (!customPonyfillsPath) {
     return allPonyfills;
   }
 
-  // Resolver la ruta absoluta
+  // Resolve absolute path
   const absolutePath = path.isAbsolute(customPonyfillsPath)
     ? customPonyfillsPath
     : path.resolve(process.cwd(), customPonyfillsPath);
 
-  // Verificar si el archivo existe
+  // Check if file exists
   if (!fs.existsSync(absolutePath)) {
-    console.warn(
-      `El archivo de ponyfills personalizado no existe: ${absolutePath}`
-    );
+    console.warn(`Custom ponyfills file does not exist: ${absolutePath}`);
     return allPonyfills;
   }
 
   try {
-    // Cargar el archivo
+    // Load the file
     const requiredModule = require(absolutePath);
     let customPonyfills: PonyfillItem[] = [];
 
-    // Soportar múltiples formatos de exportación
+    // Support multiple export formats
     if (Array.isArray(requiredModule)) {
-      // Formato: module.exports = []
+      // Format: module.exports = []
       customPonyfills = requiredModule;
     } else if (
       requiredModule.default &&
       Array.isArray(requiredModule.default)
     ) {
-      // Formato: export default []
+      // Format: export default []
       customPonyfills = requiredModule.default;
     } else if (
       requiredModule.ponyfills &&
       Array.isArray(requiredModule.ponyfills)
     ) {
-      // Formato: export const ponyfills = []
+      // Format: export const ponyfills = []
       customPonyfills = requiredModule.ponyfills;
     } else if (
       requiredModule.myPonyfills &&
       Array.isArray(requiredModule.myPonyfills)
     ) {
-      // Formato: export const myPonyfills = []
+      // Format: export const myPonyfills = []
       customPonyfills = requiredModule.myPonyfills;
     } else {
-      // Buscar cualquier propiedad que sea un array
+      // Look for any property that's an array
       const arrayProps = Object.keys(requiredModule).filter((key) =>
         Array.isArray(requiredModule[key])
       );
 
       if (arrayProps.length > 0) {
-        // Usar el primer array encontrado
+        // Use the first array found
         customPonyfills = requiredModule[arrayProps[0]];
         console.log(
-          `Usando la exportación "${arrayProps[0]}" del archivo de ponyfills`
+          `Using the "${arrayProps[0]}" export from the ponyfills file`
         );
       } else {
-        throw new Error(
-          'No se encontró una exportación válida de ponyfills (debe ser un array)'
-        );
+        throw new Error('No valid ponyfills export found (must be an array)');
       }
     }
 
-    // Validar que los ponyfills tengan el formato correcto
+    // Validate that ponyfills have the correct format
     const validPonyfills = customPonyfills.filter((ponyfill) => {
       const isValid = ponyfill.find && ponyfill.replace && ponyfill.inject;
       if (!isValid) {
         console.warn(
-          'Ponyfill inválido encontrado, debe tener propiedades: find, replace, inject'
+          'Invalid ponyfill found, must have properties: find, replace, inject'
         );
       }
       return isValid;
     });
 
     console.log(
-      `Cargados ${validPonyfills.length} ponyfills personalizados desde: ${customPonyfillsPath}`
+      `Loaded ${validPonyfills.length} custom ponyfills from: ${customPonyfillsPath}`
     );
 
-    // Combinar ponyfills
+    // Combine ponyfills
     return [...allPonyfills, ...validPonyfills];
   } catch (error) {
-    console.error(`Error al cargar ponyfills personalizados: ${error}`);
+    console.error(`Error loading custom ponyfills: ${error}`);
     return allPonyfills;
   }
 }

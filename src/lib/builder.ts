@@ -27,15 +27,15 @@ export async function buildExtendScript(options: BuildOptions): Promise<void> {
 
   const outDir = path.dirname(output);
 
-  // Limpiar directorio si es necesario
+  // Clean directory if needed
   if (clean) {
-    console.log(`Limpiando directorio: ${outDir}`);
+    console.log(`Cleaning directory: ${outDir}`);
     await rimrafAsync(`${outDir}/*`);
   }
 
-  // Compilar TypeScript usando archivo temporal o existente
+  // Compile TypeScript using a temporary file or existing one
   if (useTemplateTsconfig || !tsconfig) {
-    // Determinar si estamos en modo test
+    // Determine if we are in test mode
     const isTestMode = outDir.includes('test');
     const templateConfig = isTestMode ? tsconfigTestsES3 : tsconfigES3;
     const templateName = isTestMode
@@ -43,18 +43,18 @@ export async function buildExtendScript(options: BuildOptions): Promise<void> {
       : 'tsconfig.es3.json';
 
     if (destApp && appVersion) {
-      // Modificar configuración para incluir app y versión
+      // Modify configuration to include app and version
       templateConfig.compilerOptions.types.push(
         `types-for-adobe/${destApp}/${appVersion}`
       );
     }
 
-    console.log('Compilando TypeScript usando configuración de plantilla');
+    console.log('Compiling TypeScript using template configuration');
 
-    // Crear archivo temporal con el contenido
+    // Create temporary file with the content
     const tempConfigPath = path.join(process.cwd(), templateName);
 
-    // Modificamos la configuración para asegurarnos que rootDir apunte a la raíz del proyecto
+    // Modify the configuration to ensure rootDir points to project root
     const configToWrite = {
       ...templateConfig,
       compilerOptions: {
@@ -62,50 +62,45 @@ export async function buildExtendScript(options: BuildOptions): Promise<void> {
         outDir,
         rootDir: path.dirname(input)
       },
-      include: [input], // Solo incluir el archivo de entrada
-      files: [input] // Asegurar que solo se compile este archivo
+      include: [input], // Include only the input file
+      files: [input] // Ensure only this file is compiled
     };
 
     fs.writeFileSync(tempConfigPath, JSON.stringify(configToWrite, null, 2));
-    console.log(`Creado archivo de configuración temporal: ${templateName}`);
+    console.log(`Created temporary configuration file: ${templateName}`);
 
     try {
-      // Compilar usando el archivo temporal
+      // Compile using the temporary file
       execSync(`tsc -p "${tempConfigPath}"`, { stdio: 'inherit' });
     } catch (error) {
-      console.error('Error compilando TypeScript:', error);
-      throw error; // Propagar el error para que se maneje arriba
+      console.error('Error compiling TypeScript:', error);
+      throw error; // Propagate error to be handled upstream
     } finally {
-      // Eliminar archivo temporal de manera más tolerante
+      // Remove temporary file in a more tolerant way
       try {
         if (fs.existsSync(tempConfigPath)) {
           fs.unlinkSync(tempConfigPath);
-          console.log(
-            `Eliminado archivo de configuración temporal: ${templateName}`
-          );
+          console.log(`Removed temporary configuration file: ${templateName}`);
         }
       } catch (err) {
-        // Solo loguear el error, no es crítico si el archivo no se puede eliminar
-        console.warn(
-          `No se pudo eliminar el archivo temporal ${templateName}:`,
-          err
-        );
+        // Just log the error, it's not critical if the file cannot be deleted
+        console.warn(`Could not delete temporary file ${templateName}:`, err);
       }
     }
   } else {
-    // Usar configuración de archivo existente
-    console.log(`Compilando TypeScript usando ${tsconfig}`);
+    // Use existing configuration file
+    console.log(`Compiling TypeScript using ${tsconfig}`);
     execSync(`tsc -p "${tsconfig}"`, { stdio: 'inherit' });
   }
 
-  // Configurar y ejecutar Vite
-  console.log(`Iniciando build con Vite: ${input} -> ${output}`);
+  // Configure and run Vite
+  console.log(`Starting build with Vite: ${input} -> ${output}`);
   try {
-    // Prepara las variables de entorno que Vite necesita
+    // Prepare environment variables needed by Vite
     process.env.VITE_INPUT = input;
     process.env.VITE_OUT_PATH = outDir;
 
-    // Crear configuración de Vite
+    // Create Vite configuration
     const viteConfig = createViteConfig({
       input,
       outDir,
@@ -114,7 +109,7 @@ export async function buildExtendScript(options: BuildOptions): Promise<void> {
       customPonyfills
     });
 
-    console.log('Configuración Vite:', {
+    console.log('Vite Configuration:', {
       input,
       outDir,
       outPathExtendscript: output,
@@ -122,15 +117,15 @@ export async function buildExtendScript(options: BuildOptions): Promise<void> {
       mode
     });
 
-    // Ejecutar build de Vite
+    // Run Vite build
     await build({
       ...viteConfig,
       configFile: false
     });
 
-    // Ejecutar explícitamente el build de ExtendScript
+    // Explicitly run ExtendScript build
     if ((viteConfig as any).extendScriptConfig) {
-      console.log('Ejecutando proceso final de ExtendScript...');
+      console.log('Running final ExtendScript process...');
       if (watchMode) {
         await (viteConfig as any).extendScriptConfig.watchRollup();
       } else {
@@ -138,9 +133,9 @@ export async function buildExtendScript(options: BuildOptions): Promise<void> {
       }
     }
 
-    console.log('Build completada exitosamente');
+    console.log('Build completed successfully');
   } catch (error) {
-    console.error('Error en build Vite:', error);
+    console.error('Error in Vite build:', error);
     throw error;
   }
 }
