@@ -8,18 +8,8 @@ import { tsconfigES3, tsconfigTestsES3 } from '../tsconfigs/templates';
 import rimraf from 'rimraf';
 import { promisify } from 'util';
 import * as ts from 'typescript';
-
+import { BuildOptions } from './BuildOptions';
 const rimrafAsync = promisify(rimraf);
-
-export interface BuildOptions {
-  input: string;
-  output: string;
-  tsconfig?: string;
-  mode: 'production' | 'development';
-  watch: boolean;
-  clean: boolean;
-  useTemplateTsconfig?: boolean;
-}
 
 export async function buildExtendScript(options: BuildOptions): Promise<void> {
   const {
@@ -29,7 +19,8 @@ export async function buildExtendScript(options: BuildOptions): Promise<void> {
     mode,
     watch: watchMode,
     clean,
-    useTemplateTsconfig = false
+    useTemplateTsconfig = false,
+    customPonyfills
   } = options;
 
   const outDir = path.dirname(output);
@@ -75,13 +66,16 @@ export async function buildExtendScript(options: BuildOptions): Promise<void> {
       console.error('Error compilando TypeScript:', error);
       throw error; // Propagar el error para que se maneje arriba
     } finally {
-      // Eliminar archivo temporal
+      // Eliminar archivo temporal de manera más tolerante
       try {
-        fs.unlinkSync(tempConfigPath);
-        console.log(
-          `Eliminado archivo de configuración temporal: ${templateName}`
-        );
+        if (fs.existsSync(tempConfigPath)) {
+          fs.unlinkSync(tempConfigPath);
+          console.log(
+            `Eliminado archivo de configuración temporal: ${templateName}`
+          );
+        }
       } catch (err) {
+        // Solo loguear el error, no es crítico si el archivo no se puede eliminar
         console.warn(
           `No se pudo eliminar el archivo temporal ${templateName}:`,
           err
@@ -106,7 +100,8 @@ export async function buildExtendScript(options: BuildOptions): Promise<void> {
       input,
       outDir,
       watch: watchMode,
-      mode
+      mode,
+      customPonyfills
     });
 
     console.log('Configuración Vite:', {

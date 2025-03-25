@@ -1,16 +1,17 @@
 // Estructura del archivo kt-config.json
-interface KTConfig {
+export interface KTConfig {
   default?: BuildOptions; // Configuración por defecto
   [configName: string]: BuildOptions | undefined; // Configuraciones con nombre
 }
 
 // BuildOptions incluye el campo tsconfig opcional
-interface BuildOptions {
-  input?: string;
-  output?: string;
-  tsconfig?: string; // Ruta a un archivo tsconfig personalizado
-  mode?: 'production' | 'development';
-  watch?: boolean;
-  clean?: boolean;
+export interface BuildOptions {
+  input: string;
+  output: string;
+  tsconfig?: string;
+  mode: 'production' | 'development';
+  watch: boolean;
+  clean: boolean;
   useTemplateTsconfig?: boolean;
+  customPonyfills?: string;
 }

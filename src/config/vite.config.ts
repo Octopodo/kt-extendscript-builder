@@ -7,8 +7,9 @@ export function createViteConfig(options: {
   outDir: string;
   watch: boolean;
   mode: 'production' | 'development';
+  customPonyfills?: string;
 }) {
-  const { input, outDir, watch: watchMode, mode } = options;
+  const { input, outDir, watch: watchMode, mode, customPonyfills } = options;
 
   const extensions = ['.js', '.ts', '.tsx'];
   const outPathExtendscript = path.join(outDir, 'index.js');
@@ -38,7 +39,13 @@ export function createViteConfig(options: {
   };
 
   // Invocar configuración de ExtendScript
-  extendscriptConfig(input, outPathExtendscript, extensions, isProduction);
+  extendscriptConfig(
+    input,
+    outPathExtendscript,
+    extensions,
+    isProduction,
+    customPonyfills
+  );
 
   return defineConfig(config);
 }

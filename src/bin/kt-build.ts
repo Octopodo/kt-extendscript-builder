@@ -1,7 +1,8 @@
 #!/usr/bin/env node
 import yargs from 'yargs';
 import { hideBin } from 'yargs/helpers';
-import { buildExtendScript, BuildOptions } from '../lib/builder';
+import { buildExtendScript } from '../lib/builder';
+import { BuildOptions } from '../lib/BuildOptions';
 import path from 'path';
 import fs from 'fs';
 
@@ -12,7 +13,7 @@ interface KTConfig {
 }
 
 // Función para leer el archivo de configuración
-function loadConfig(configName?: string): Partial<BuildOptions> {
+export function loadConfig(configName?: string): Partial<BuildOptions> {
   const configPath = path.join(process.cwd(), 'kt-config.json');
 
   if (fs.existsSync(configPath)) {
@@ -88,6 +89,10 @@ const argv = yargs(hideBin(process.argv))
     description: 'Limpiar directorio de salida',
     default: true
   })
+  .option('custom-ponyfills', {
+    type: 'string',
+    description: 'Ruta a un archivo de ponyfills personalizados'
+  })
   .help()
   .parseSync();
 
@@ -122,7 +127,9 @@ const buildOptions: BuildOptions = {
   useTemplateTsconfig:
     (typeof argv['use-template'] === 'boolean'
       ? argv['use-template']
-      : fileConfig.useTemplateTsconfig) || false
+      : fileConfig.useTemplateTsconfig) || false,
+  customPonyfills:
+    (argv['custom-ponyfills'] as string) || fileConfig.customPonyfills
 };
 
 // Construir

@@ -11,6 +11,7 @@ KT ExtendScript Builder is a specialized tool designed to simplify the process o
 - Built-in TypeScript templates for quick setup
 - Support for custom TypeScript configurations
 - Command-line interface for easy integration into workflows
+- Custom ponyfills support for extending ExtendScript compatibility
 
 ## Installation
 
@@ -30,16 +31,17 @@ npx kt-build [options]
 
 ### Options
 
-| Option         | Alias | Description                         | Default       |
-| -------------- | ----- | ----------------------------------- | ------------- |
-| --input        | -i    | Input file path                     | src/index.ts  |
-| --output       | -o    | Output file path                    | dist/index.js |
-| --test         | -t    | Build tests                         | false         |
-| --watch        | -w    | Watch mode                          | false         |
-| --mode         | -m    | Build mode (production/development) | production    |
-| --tsconfig     |       | Path to custom tsconfig file        |               |
-| --use-template |       | Use built-in tsconfig template      | false         |
-| --clean        | -c    | Clean output directory before build | true          |
+| Option             | Alias | Description                         | Default       |
+| ------------------ | ----- | ----------------------------------- | ------------- |
+| --input            | -i    | Input file path                     | src/index.ts  |
+| --output           | -o    | Output file path                    | dist/index.js |
+| --test             | -t    | Build tests                         | false         |
+| --watch            | -w    | Watch mode                          | false         |
+| --mode             | -m    | Build mode (production/development) | production    |
+| --tsconfig         |       | Path to custom tsconfig file        |               |
+| --use-template     |       | Use built-in tsconfig template      | false         |
+| --clean            | -c    | Clean output directory before build | true          |
+| --custom-ponyfills |       | Path to custom ponyfills file       |               |
 
 ### Configuration File
 
@@ -53,7 +55,8 @@ You can also create a `kt-config.json` file in your project root to define diffe
     "mode": "production",
     "watch": false,
     "clean": true,
-    "useTemplateTsconfig": true
+    "useTemplateTsconfig": true,
+    "customPonyfills": "./my-ponyfills.ts"
   },
   "dev": {
     "mode": "development",
@@ -102,6 +105,54 @@ npm run dev          # Development mode with watching
 npm run test         # Build tests
 ```
 
+### Example: TypeScript to ExtendScript
+
+Using the configuration above, here's a simple example of a TypeScript file and its transpiled output:
+
+**TypeScript (src/index.ts):**
+
+```typescript
+class Greeting {
+  private message: string;
+
+  constructor(name: string) {
+    this.message = 'Hello, ' + name + '!';
+  }
+
+  public show(): void {
+    alert(this.message);
+  }
+}
+
+// Create and use the greeting
+const greeting = new Greeting('Adobe');
+greeting.show();
+```
+
+**Transpiled ExtendScript (dist/index.js):**
+
+```javascript
+(function (thisObj) {
+  //EXTENDSCRIPT INCLUDES, PONYFILLS AND BABEL HELPERS
+  //......
+  //------------------------------//
+  var Greeting = (function () {
+    function Greeting(name) {
+      this.message = 'Hello, ' + name + '!';
+    }
+    Greeting.prototype.show = function () {
+      alert(this.message);
+    };
+    return Greeting;
+  })();
+
+  // Create and use the greeting
+  var greeting = new Greeting('Adobe');
+  greeting.show();
+  thisObj.KT = KT;
+})(this);
+```
+
 ### TypeScript Configuration
 
 KT ExtendScript Builder provides built-in TypeScript templates specifically configured for ExtendScript compatibility. These templates target ES3 and include the necessary type definitions for Adobe Creative Cloud applications.
@@ -131,6 +182,61 @@ You can use these templates by setting the `useTemplateTsconfig` option to `true
 }
 ```
 
+### Custom Ponyfills
+
+KT ExtendScript Builder supports custom ponyfills to enhance ExtendScript compatibility with modern JavaScript features. This functionality is inspired by and compatible with [Bolt CEP's ponyfill system](https://github.com/hyperbrew/bolt-cep?tab=readme-ov-file#custom-ponyfills).
+
+To use custom ponyfills:
+
+1. Create a TypesCript file exporting an array of ponyfill objects:
+
+```javascript
+// my-ponyfills.ts
+export const ponyfills = [
+  {
+    find: 'Array.prototype.includes',
+    replace: '__arrayIncludes',
+    inject: `function __arrayIncludes(arr, item) { 
+            for (var i = 0; i < arr.length; i++) { 
+                if (arr[i] === item) return true; 
+            } 
+            return false; 
+        }`
+  },
+  {
+    find: 'String.prototype.startsWith',
+    replace: '__stringStartsWith',
+    inject: `function __stringStartsWith(str, search) { 
+            return str.indexOf(search) === 0; 
+        }`
+  }
+];
+```
+
+2. Specify the path to your ponyfills file:
+
+```bash
+npx kt-build --custom-ponyfills ./my-ponyfills.ts
+```
+
+Or in your `kt-config.json`:
+
+```json
+{
+  "default": {
+    "customPonyfills": "./my-ponyfills.ts"
+  }
+}
+```
+
+Each ponyfill object requires three properties:
+
+- `find`: The JavaScript feature to replace
+- `replace`: The function name to use instead
+- `inject`: The actual implementation code
+
+Custom ponyfills are combined with built-in ones which already provide polyfills for common methods like `Object.create` and `Object.assign`.
+
 ## Examples
 
 ### Basic Usage
@@ -144,6 +250,9 @@ npx kt-build --input src/main.ts --output build/script.js
 
 # Build in development mode with watch enabled
 npx kt-build --mode development --watch
+
+# Build with custom ponyfills
+npx kt-build --custom-ponyfills ./path/to/ponyfills.js
 ```
 
 ### Programmatic Usage
@@ -159,7 +268,8 @@ buildExtendScript({
   mode: 'production',
   watch: false,
   clean: true,
-  useTemplateTsconfig: true
+  useTemplateTsconfig: true,
+  customPonyfills: './path/to/ponyfills.js'
 });
 ```
 

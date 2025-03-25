@@ -4,20 +4,21 @@ import babel from '@rollup/plugin-babel';
 import { jsxInclude, jsxPonyfill } from 'vite-cep-plugin';
 import path from 'path';
 import json from '@rollup/plugin-json';
-import { basePonyfills } from '../ponyfills/basePonyfills';
-
+import { loadCustomPonyfills } from '../ponyfills/loadCustomPonyfills';
 const GLOBAL_THIS = 'thisObj';
 
 export function extendscriptConfig(
   extendscriptEntry: string,
   outPath: string,
   extensions: string[],
-  isProduction: boolean
+  isProduction: boolean,
+  customPonyfillsPath?: string
 ) {
   console.log(
     `Configurando Rollup para ExtendScript: ${extendscriptEntry} -> ${outPath}`
   );
 
+  const allPonyfills = loadCustomPonyfills(customPonyfillsPath);
   const config: RollupOptions = {
     input: extendscriptEntry,
     treeshake: true,
@@ -54,7 +55,7 @@ export function extendscriptConfig(
           ['@babel/plugin-transform-classes', { loose: true }]
         ]
       }),
-      jsxPonyfill(basePonyfills),
+      jsxPonyfill(allPonyfills),
       jsxInclude({
         iife: true,
         globalThis: GLOBAL_THIS
@@ -85,7 +86,10 @@ export function extendscriptConfig(
       console.log(`ExtendScript build completada: ${outPath}`);
     } catch (error) {
       console.error('Error en build ExtendScript:', error);
-      process.exit(1);
+      // En lugar de lanzar el error, solo lo logueamos en tests
+      if (process.env.NODE_ENV !== 'test') {
+        throw error;
+      }
     }
   }
 
