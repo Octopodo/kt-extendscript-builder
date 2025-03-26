@@ -1,6 +1,6 @@
 # KT ExtendScript Builder
 
-KT ExtendScript Builder is a specialized tool designed to simplify the process of transpiling TypeScript code to ExtendScript for Adobe Creative Cloud applications. Built on Vite, it provides a streamlined workflow for developing, building, and testing ExtendScript code.
+KT ExtendScript Builder is a specialized tool designed to simplify the process of transpiling TypeScript code to ExtendScript for Adobe Creative Cloud applications. Built on Vite, it provides a streamlined workflow for developing, building, and testing ExtendScript code. Thanks to this builder, you can use advanced TypeScript features like classes and inheritance in your ExtendScript projects, which are automatically transpiled to compatible ES3 code.
 
 ## Features
 
@@ -12,6 +12,8 @@ KT ExtendScript Builder is a specialized tool designed to simplify the process o
 - Support for custom TypeScript configurations
 - Command-line interface for easy integration into workflows
 - Custom ponyfills support for extending ExtendScript compatibility
+- Adobe application type definitions integration
+- Test-specific configuration support
 
 ## Installation
 
@@ -42,6 +44,8 @@ npx kt-build [options]
 | --use-template     |       | Use built-in tsconfig template      | false         |
 | --clean            | -c    | Clean output directory before build | true          |
 | --custom-ponyfills |       | Path to custom ponyfills file       |               |
+| --dest-app         |       | Adobe app destination               |               |
+| --app-version      |       | Adobe app version                   |               |
 
 ### Configuration File
 
@@ -56,7 +60,9 @@ You can also create a `kt-config.json` file in your project root to define diffe
     "watch": false,
     "clean": true,
     "useTemplateTsconfig": true,
-    "customPonyfills": "./my-ponyfills.ts"
+    "customPonyfills": "./my-ponyfills.ts",
+    "destApp": "AfterEffects",
+    "appVersion": "23.0"
   },
   "dev": {
     "mode": "development",
@@ -65,7 +71,8 @@ You can also create a `kt-config.json` file in your project root to define diffe
   "test": {
     "input": "src/tests/index.ts",
     "output": "dist.test/index.js",
-    "tsconfig": "tsconfig.tests.json"
+    "tsconfig": "tsconfig.tests.json",
+    "test": true
   }
 }
 ```
@@ -92,7 +99,7 @@ You can easily integrate KT ExtendScript Builder into your npm scripts:
     "clean": "kt-build --clean"
   },
   "devDependencies": {
-    "kt-extendscript-builder": "^1.0.0"
+    "kt-extendscript-builder": "^1.4.10"
   }
 }
 ```
@@ -237,6 +244,32 @@ Each ponyfill object requires three properties:
 
 Custom ponyfills are combined with built-in ones which already provide polyfills for common methods like `Object.create` and `Object.assign`.
 
+### Adobe Application Type Definitions
+
+You can specify which Adobe application and version to target for type definitions:
+
+```bash
+npx kt-build --dest-app AfterEffects --app-version 23.0
+```
+
+This will automatically include the appropriate type definitions in the TypeScript configuration when using the built-in templates.
+
+## Testing Support
+
+The builder provides enhanced support for testing ExtendScript code:
+
+```bash
+npx kt-build --test
+```
+
+When using the `--test` flag or a configuration with `"test": true`, the builder:
+
+- Uses a dedicated test-specific TypeScript template
+- Automatically adjusts input paths to target test files
+- Creates output in a separate test directory
+
+You can use [KT Testing Suite](https://github.com/Octopodo/kt-testing-suite-core) since it is part of the KT ecosystem.
+
 ## Examples
 
 ### Basic Usage
@@ -253,6 +286,12 @@ npx kt-build --mode development --watch
 
 # Build with custom ponyfills
 npx kt-build --custom-ponyfills ./path/to/ponyfills.js
+
+# Build with Adobe application targeting
+npx kt-build --dest-app Photoshop --app-version 24.0
+
+# Build test files
+npx kt-build --test
 ```
 
 ### Programmatic Usage
@@ -269,7 +308,10 @@ buildExtendScript({
   watch: false,
   clean: true,
   useTemplateTsconfig: true,
-  customPonyfills: './path/to/ponyfills.js'
+  customPonyfills: './path/to/ponyfills.js',
+  destApp: 'Illustrator',
+  appVersion: '27.0',
+  test: false
 });
 ```
 
