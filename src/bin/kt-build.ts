@@ -113,17 +113,25 @@ const isConfigName = possibleConfigName && !possibleConfigName.startsWith('-');
 const fileConfig = loadConfig(isConfigName ? possibleConfigName : undefined);
 
 // Determine tsconfig (priority: CLI > config file > default test)
-let tsconfigPath = argv.tsconfig as string;
-if (!tsconfigPath && fileConfig.tsconfig) {
-  tsconfigPath = fileConfig.tsconfig;
-} else if (argv.test && !tsconfigPath) {
-  tsconfigPath = 'tsconfig.tests.json';
+let tsconfigPath = fileConfig.tsconfig as string;
+if (!tsconfigPath) {
+  tsconfigPath = argv.tsconfig as string;
 }
+const isTestMode = argv.test === true;
 
-// Combine configurations prioritizing configuration file over CLI
+// Modifica las rutas predeterminadas para tests
+const defaultInput = isTestMode ? 'src/tests/index.test.ts' : 'src/index.ts';
+const defaultOutput = isTestMode ? 'dist.test/index.test.js' : 'dist/index.js';
+
+// Ajusta la prioridad en la sección de configuración
 const buildOptions: BuildOptions = {
-  input: fileConfig.input ?? (argv.input as string) ?? 'src/index.ts',
-  output: fileConfig.output ?? (argv.output as string) ?? 'dist/index.js',
+  // Cambia la prioridad - test tiene prioridad ABSOLUTA
+  input: isTestMode
+    ? defaultInput
+    : fileConfig.input ?? (argv.input as string) ?? defaultInput,
+  output: isTestMode
+    ? defaultOutput
+    : fileConfig.output ?? (argv.output as string) ?? defaultOutput,
   tsconfig: tsconfigPath,
   watch:
     fileConfig.watch ?? (typeof argv.watch === 'boolean' ? argv.watch : false),
@@ -133,13 +141,20 @@ const buildOptions: BuildOptions = {
     'production',
   clean:
     fileConfig.clean ?? (typeof argv.clean === 'boolean' ? argv.clean : true),
-  useTemplateTsconfig:
-    fileConfig.useTemplateTsconfig ??
-    (typeof argv['use-template'] === 'boolean' ? argv['use-template'] : false),
+
+  // Test tiene prioridad para la plantilla
+  useTemplateTsconfig: isTestMode
+    ? true
+    : fileConfig.useTemplateTsconfig ??
+      (typeof argv['use-template'] === 'boolean'
+        ? argv['use-template']
+        : false),
+
   customPonyfills:
     fileConfig.customPonyfills ?? (argv['custom-ponyfills'] as string),
   destApp: fileConfig.destApp ?? (argv['dest-app'] as string),
-  appVersion: fileConfig.appVersion ?? (argv['app-version'] as string)
+  appVersion: fileConfig.appVersion ?? (argv['app-version'] as string),
+  test: isTestMode
 };
 
 console.log('Build configuration:', buildOptions);

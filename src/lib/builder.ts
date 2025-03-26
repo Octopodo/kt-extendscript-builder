@@ -36,12 +36,11 @@ export async function buildExtendScript(options: BuildOptions): Promise<void> {
   // Compile TypeScript using a temporary file or existing one
   if (useTemplateTsconfig || !tsconfig) {
     // Determine if we are in test mode
-    const isTestMode = outDir.includes('test');
+    const isTestMode = options.test === true || outDir.includes('test');
     const templateConfig = isTestMode ? tsconfigTestsES3 : tsconfigES3;
     const templateName = isTestMode
       ? 'tsconfig.tests.es3.json'
       : 'tsconfig.es3.json';
-
     if (destApp && appVersion) {
       // Modify configuration to include app and version
       templateConfig.compilerOptions.types.push(
@@ -60,10 +59,13 @@ export async function buildExtendScript(options: BuildOptions): Promise<void> {
       compilerOptions: {
         ...templateConfig.compilerOptions,
         outDir,
-        rootDir: path.dirname(input)
+        // Para tests, usar 'src' como rootDir
+        rootDir: isTestMode ? './src' : path.dirname(input)
       },
-      include: [input], // Include only the input file
-      files: [input] // Ensure only this file is compiled
+      include: isTestMode
+        ? ['src/tests/**/*.ts', 'src/**/*.ts'] // Para tests, incluir todos los archivos
+        : [input], // Para compilación normal, solo el archivo de entrada
+      files: isTestMode ? undefined : [input]
     };
 
     fs.writeFileSync(tempConfigPath, JSON.stringify(configToWrite, null, 2));
@@ -127,7 +129,7 @@ export async function buildExtendScript(options: BuildOptions): Promise<void> {
     if ((viteConfig as any).extendScriptConfig) {
       console.log('Running final ExtendScript process...');
       if (watchMode) {
-        await (viteConfig as any).extendScriptConfig.watchRollup();
+        await (viteConfig as any).extendScriptConfig.watch();
       } else {
         await (viteConfig as any).extendScriptConfig.build();
       }

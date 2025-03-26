@@ -16,4 +16,5 @@ export interface BuildOptions {
   customPonyfills?: string;
   destApp?: string;
   appVersion?: string;
+  test?: boolean;
 }
