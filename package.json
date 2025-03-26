@@ -1,6 +1,6 @@
 {
   "name": "kt-extendscript-builder",
-  "version": "1.4.6",
+  "version": "1.4.11",
   "description": "Vite based builder for transpile TypeScript to ExtendScript",
   "keywords": [
     "TypeScript",
