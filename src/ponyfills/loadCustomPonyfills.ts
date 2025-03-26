@@ -56,23 +56,21 @@ export function loadCustomPonyfills(
     ) {
       // Format: export const ponyfills = []
       customPonyfills = requiredModule.ponyfills;
-    } else if (
-      requiredModule.myPonyfills &&
-      Array.isArray(requiredModule.myPonyfills)
-    ) {
-      // Format: export const myPonyfills = []
-      customPonyfills = requiredModule.myPonyfills;
     } else {
-      // Look for any property that's an array
+      // Look for any property that have ponyfills on his name
       const arrayProps = Object.keys(requiredModule).filter((key) =>
-        Array.isArray(requiredModule[key])
+        key.toLowerCase().includes('ponyfills')
       );
 
       if (arrayProps.length > 0) {
-        // Use the first array found
-        customPonyfills = requiredModule[arrayProps[0]];
+        // Use all the ponyfills found
+        for (const prop of arrayProps) {
+          if (Array.isArray(requiredModule[prop])) {
+            customPonyfills = customPonyfills.concat(requiredModule[prop]);
+          }
+        }
         console.log(
-          `Using the "${arrayProps[0]}" export from the ponyfills file`
+          `Loaded ${customPonyfills.length} custom ponyfills from: ${customPonyfillsPath}`
         );
       } else {
         throw new Error('No valid ponyfills export found (must be an array)');
