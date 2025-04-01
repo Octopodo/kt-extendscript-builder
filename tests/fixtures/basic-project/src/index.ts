@@ -1,18 +1,14 @@
+class TestBulder {
+    private version: string;
 
-      class Greeting {
-        private message: string;
-        
-        constructor(name: string) {
-          this.message = `Hello, ${name}!`;
-        }
-        
-        show(): void {
-          alert(this.message);
-        }
-      }
-      
-      const greeting = new Greeting("Adobe");
-      greeting.show();
-      
-      export { Greeting };
-      
+    constructor(version: string) {
+        this.version = version;
+    }
+
+    salute() {
+        $.writeln('Hello from TestBuilder ' + this.version);
+    }
+}
+
+const testBuilder = new TestBulder('1.0.0');
+testBuilder.salute();

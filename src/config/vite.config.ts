@@ -1,17 +1,13 @@
 import { defineConfig, UserConfig } from 'vite';
 import * as nodePath from 'path'; // Modified import to avoid conflicts
 import { extendscriptConfig } from './vite.es.config';
+import { BuildOptions } from '../types';
 interface ExtendedUserConfig extends UserConfig {
   extendScriptConfig?: any;
 }
-export function createViteConfig(options: {
-  input: string;
-  outDir: string;
-  watch: boolean;
-  mode: 'production' | 'development';
-  customPonyfills?: string;
-}) {
-  const { input, outDir, watch: watchMode, mode, customPonyfills } = options;
+export function createViteConfig(options: Partial<BuildOptions> = {}) {
+ {
+  const { input, ['outDir'], watch: watchMode, mode, customPonyfills } = options;
 
   // Use the modified import
   const inputFileName = nodePath.basename(input);

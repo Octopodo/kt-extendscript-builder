@@ -1,0 +1,19 @@
+{
+  "compilerOptions": {
+    "target": "ES3",
+    "module": "CommonJS",
+    "outDir": "C:\\work\\dev\\KT\\kt-extendscript-builder\\tests\\fixtures\\basic-project",
+    "rootDir": "C:\\work\\dev\\KT\\kt-extendscript-builder\\tests\\fixtures\\basic-project\\src",
+    "strict": true,
+    "esModuleInterop": true,
+    "skipLibCheck": true,
+    "forceConsistentCasingInFileNames": true,
+    "lib": [],
+    "sourceMap": true,
+    "types": [
+      "kt-core/src/lib/json2",
+      "types-for-adobe/shared/global",
+      "types-for-adobe/shared/JavaScript"
+    ]
+  }
+}

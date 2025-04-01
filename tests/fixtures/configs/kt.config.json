@@ -1,0 +1,12 @@
+{
+    "my-ae-preset": {
+        "input": "src/my-custom-input.ts",
+        "output": "dist/my-custom-output.js",
+        "dest-app": "aftereffects"
+    },
+    "my-ps-preset": {
+        "input": "src/my-custom-input.ts",
+        "output": "dist/my-custom-output.js",
+        "dest-app": "photoshop"
+    }
+}
