@@ -19,9 +19,15 @@ describe('KTBuilderOptions', () => {
             expect(typeof option.type).toBe('string');
             expect(typeof option.description).toBe('string');
 
-            // Verify that alias is a string if it exists
-            if ('alias' in option) {
-                expect(typeof option.alias).toBe('string');
+            // Verify that alias is a string or an array if it exists
+            if (option.alias) {
+                if (Array.isArray(option.alias)) {
+                    option.alias.forEach((alias) => {
+                        expect(typeof alias).toBe('string');
+                    });
+                } else {
+                    expect(typeof option.alias).toBe('string');
+                }
             }
         });
     });
