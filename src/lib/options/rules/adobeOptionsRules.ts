@@ -1,6 +1,5 @@
 import { get } from 'http';
-import { DependencyRule } from '../../types';
-import { BuildOptions } from '../../types';
+import { DependencyRule, BuildOptions } from '../../../types';
 import { getAdobeAppVersions } from '../../utils/getAdobeAppVersions';
 const availableVersions = getAdobeAppVersions();
 
