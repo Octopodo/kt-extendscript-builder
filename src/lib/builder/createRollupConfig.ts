@@ -1,5 +1,5 @@
 import { BuildOptions } from '../../types';
-import { PonyfillCollector } from '../PonifillCollector';
+import { PonyfillCollector } from '../utils/PonifillCollector';
 import { rollup, watch, RollupOptions, OutputOptions } from 'rollup';
 import nodeResolve from '@rollup/plugin-node-resolve';
 import babel from '@rollup/plugin-babel';
