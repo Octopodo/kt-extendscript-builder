@@ -1,6 +1,6 @@
 import { describe, it, expect } from 'vitest';
-import { OptionsPresetsResolver } from '../../src/lib/Options/OptionsPresetsResolver';
-import { presets } from '../../src/lib/Options/optionsPresets';
+import { OptionsPresetsResolver } from '../../src/lib/options/OptionsPresetsResolver';
+import { presets } from '../../src/lib/options/optionsPresets';
 
 import fs from 'fs';
 import path from 'path';
