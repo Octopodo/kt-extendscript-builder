@@ -1,0 +1,15 @@
+{
+    "compilerOptions": {
+        "target": "ES3",
+        "module": "CommonJS",
+        "outDir": "./customDir",
+        "rootDir": "./customRoot",
+        "strict": true,
+        "esModuleInterop": true,
+        "skipLibCheck": true,
+        "forceConsistentCasingInFileNames": true,
+        "lib": [],
+        "sourceMap": true,
+        "types": ["custom-types"]
+    }
+}
