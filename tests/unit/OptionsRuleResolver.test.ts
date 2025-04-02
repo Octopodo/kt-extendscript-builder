@@ -1,7 +1,7 @@
 import { describe, it, expect, beforeEach } from 'vitest';
 import { OptionsRuleResolver } from '../../src/lib/options/OptionsRuleResolver';
-import { OptionsParser } from '../../src/lib/Options/OptionsParser';
-import { DependencyRule } from '../../src/lib/types';
+import { OptionsParser } from '../../src/lib/options/OptionsParser';
+import { DependencyRule } from '../../src/types';
 import { parse } from 'path';
 
 describe('OptionsRuleResolver', () => {

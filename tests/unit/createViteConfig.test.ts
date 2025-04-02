@@ -1,5 +1,6 @@
+import ts from 'typescript';
 import { createViteConfig } from '../../src/lib/builder/createViteConfig';
-import { OptionsParser } from '../../src/lib/Options/OptionsParser';
+import { OptionsParser } from '../../src/lib/options/OptionsParser';
 import { OptionsResolver } from '../../src/lib/options/OptionsResolver';
 
 import { describe, expect, it } from 'vitest';
@@ -25,7 +26,9 @@ describe('Vite Configuration', () => {
         expect(viteConfig.build?.minify).toBe(false);
         expect(viteConfig.build?.watch).toBe(null);
         expect(viteConfig.build?.rollupOptions?.input).toBe('custom/source.ts');
+        //@ts-ignore
         expect(viteConfig.build?.rollupOptions?.output?.entryFileNames).toBe('source.js');
+        //@ts-ignore
         expect(viteConfig.build?.rollupOptions?.output?.dir).toBe('custom');
     });
 

@@ -1,5 +1,5 @@
 import { describe, it, expect } from 'vitest';
-import { OptionsParser } from '../../src/lib/Options/OptionsParser';
+import { OptionsParser } from '../../src/lib/options/OptionsParser';
 
 describe('OptionsParser', () => {
     // Test 2: Verify that custom options are parsed correctly

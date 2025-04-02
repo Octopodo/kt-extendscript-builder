@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest';
-import { getAdobeAppVersions } from '../../src/lib/Utils/getAdobeAppVersions';
+import { getAdobeAppVersions } from '../../src/lib/utils/getAdobeAppVersions';
 
 const afterEffectsVersions = [
     '10.5',

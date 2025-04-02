@@ -1,6 +1,6 @@
 import { describe, it, expect } from 'vitest';
 import { OptionsResolver } from '../../src/lib/options/OptionsResolver';
-import { OptionsParser } from '../../src/lib/Options/OptionsParser';
+import { OptionsParser } from '../../src/lib/options/OptionsParser';
 import { defaultBuildOptions } from '../../src/types';
 
 describe('OptionsResolver', () => {
