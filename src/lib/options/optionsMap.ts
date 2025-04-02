@@ -20,19 +20,19 @@ export const buildOptions = [
 export const typescriptOptions = [
     {
         name: 'tsconfig',
-        alias: 't',
+        alias: 'ts',
         type: 'string',
         description: 'Path to tsconfig file'
     },
     {
         name: 'tsconfig-test-path',
-        alias: 'tt',
+        alias: ['tt', 'tsconfigTestPath'],
         type: 'string',
         description: 'Path to tsconfig test file'
     },
     {
         name: 'tsconfig-template',
-        alias: 'u',
+        alias: ['u', 'tsconfigTemplate'],
         type: 'boolean',
         description: 'Use template tsconfig instead of custom'
         // default: false
@@ -42,6 +42,7 @@ export const typescriptOptions = [
 export const processorOptions = [
     {
         name: 'test',
+        alias: 't',
         type: 'boolean',
         description: 'Build test files'
     },
@@ -59,6 +60,13 @@ export const processorOptions = [
         description: 'Build mode (production or development)',
         default: 'production',
         choices: ['production', 'development']
+    },
+    {
+        name: 'minify',
+        alias: 'min',
+        type: 'boolean',
+        description: 'Enable minification',
+        default: false
     }
 ] as const;
 
@@ -84,7 +92,7 @@ export const postprocessorOptions = [
 export const configOptions = [
     {
         name: 'config-file',
-        alias: 'f',
+        alias: ['f', 'configFile'],
         type: 'string',
         description: 'Path to config file',
         default: 'kt.config.json'
@@ -108,13 +116,13 @@ export const configOptions = [
 export const adobeOptions = [
     {
         name: 'dest-app',
-        alias: 'd',
+        alias: ['d', 'destApp'],
         type: 'string',
         description: 'Adobe application for deployment'
     },
     {
         name: 'app-version',
-        alias: 'v',
+        alias: ['v', 'appVersion'],
         type: 'string',
         description: 'Adobe application version'
     }
