@@ -3,6 +3,7 @@ import { BuildOptions } from '../../types'; // Ajusta la ruta según tu estructu
 import path from 'path';
 import fs from 'fs';
 import { tsconfigES3, tsconfigTestsES3 } from './tsconfigTemplates'; // Ajusta la ruta a tus templates
+import { option } from 'yargs';
 
 export class TsconfigLoader {
     constructor() {}
@@ -16,7 +17,7 @@ export class TsconfigLoader {
         }
 
         if (options['tsconfig-template']) {
-            return this.loadFromTemplate();
+            return this.loadFromTemplate(options.test);
         } else {
             return this.loadFromFile(tsconfigPath);
         }
