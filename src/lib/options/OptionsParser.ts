@@ -1,6 +1,6 @@
 import yargs from 'yargs';
 import { hideBin } from 'yargs/helpers';
-import { BuildOptions } from '../types';
+import { BuildOptions } from '../../types';
 import { KTBuilderOptions } from './KTBuilderOptions';
 /**
  * A class responsible for collecting build options from command line arguments.
