@@ -3,7 +3,7 @@ import path from 'path';
 import fs from 'fs';
 import { build } from 'vite';
 import { createViteConfig } from '../config/vite.config';
-import { tsconfigES3, tsconfigTestsES3 } from '../tsconfigs/templates';
+import { tsconfigES3, tsconfigTestsES3 } from './config/tsconfigTemplates';
 //@ts-ignore
 import rimraf from 'rimraf';
 import { promisify } from 'util';
