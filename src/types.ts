@@ -1,5 +1,6 @@
+import { RollupOptions } from 'rollup';
 import { KTBuilderOptions, KTBuilderOption } from './lib/options/KTBuilderOptions';
-
+import { UserConfig } from 'vite';
 export interface PonyfillItem {
     find: string;
     replace: string;
@@ -41,3 +42,13 @@ export const defaultBuildOptions: Partial<BuildOptions> = Object.fromEntries(
 );
 
 export type DependencyRule = (options: Partial<BuildOptions>) => Partial<BuildOptions>;
+
+export interface ExtendedViteConfig extends UserConfig {
+    extendScriptConfig?: any;
+}
+
+export interface ViteEsConfig {
+    build: () => Promise<void>;
+    watch: () => void;
+    config: RollupOptions;
+}
