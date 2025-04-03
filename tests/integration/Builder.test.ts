@@ -15,14 +15,22 @@ describe('Builder', () => {
     });
 
     it('should run the build process without errors', async () => {
-        try {
+        async function build() {
             const builder = new Builder();
             process.argv = ['node', 'script.js', ...defaultPaths];
-            await builder.run();
-        } catch (error: any) {
-            console.error('Error in build process:', error);
+
+            try {
+                const builder = new Builder();
+                process.argv = ['node', 'script.js', ...defaultPaths];
+                await builder.run();
+            } catch (error: any) {
+                console.error('Error in build process:', error);
+            }
         }
+
+        expect(build).not.toThrowError();
     });
+
     it('should run the build process with watch mode', async () => {
         const builder = new Builder();
         process.argv = ['node', 'script.js', ...defaultPaths, '--watch', 'true', '--mode', 'development'];
