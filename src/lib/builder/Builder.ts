@@ -1,7 +1,7 @@
 import { BuildOptions } from '../../types';
 import { OptionsResolver, OptionsParser } from '../options';
-import { createViteConfig } from './createViteConfig';
-import { createRollupConfig } from './createRollupConfig';
+import { createViteConfig } from '../config/createViteConfig';
+import { createRollupConfig } from '../config/createRollupConfig';
 import { ExtendedViteConfig } from '../../types';
 import { defineConfig, build as viteBuild } from 'vite';
 
@@ -11,7 +11,7 @@ export class Builder {
 
     async run(): Promise<void> {
         this.preprocess();
-        this.build();
+
         await viteBuild(this.viteConfig);
         if (this.options.watch) {
             return this.watch();
