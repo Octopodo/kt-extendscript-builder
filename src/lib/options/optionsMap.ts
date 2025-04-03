@@ -86,6 +86,12 @@ export const postprocessorOptions = [
         type: 'boolean',
         description: 'Clean output directory before build'
         // default: true
+    },
+    {
+        name: 'uglify',
+        alias: 'ug',
+        type: 'boolean',
+        description: 'Enable uglification of the output file'
     }
 ] as const;
 
