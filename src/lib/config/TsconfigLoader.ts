@@ -9,6 +9,7 @@ export class TsconfigLoader {
     constructor() {}
 
     load(options: Partial<BuildOptions>) {
+        let tsconfig;
         let tsconfigPath: string = 'tsconfig.json';
         if (options.test && options['tsconfig-test-path']) {
             tsconfigPath = options['tsconfig-test-path'] as string;
@@ -17,10 +18,19 @@ export class TsconfigLoader {
         }
 
         if (options['tsconfig-template']) {
-            return this.loadFromTemplate(options.test);
+            tsconfig = this.loadFromTemplate(options.test);
         } else {
-            return this.loadFromFile(tsconfigPath);
+            tsconfig = this.loadFromFile(tsconfigPath);
         }
+
+        if (options.input) {
+            tsconfig.compilerOptions.rootDir = path.dirname(options.input as string);
+        }
+        if (options.output) {
+            tsconfig.compilerOptions.outDir = path.dirname(options.output as string);
+        }
+
+        return tsconfig;
     }
 
     private loadFromTemplate(test: boolean = false) {
