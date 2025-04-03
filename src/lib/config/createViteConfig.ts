@@ -16,11 +16,13 @@ export function createViteConfig(options: Partial<BuildOptions> = {}): ExtendedV
         build: {
             minify: minify,
             watch: watch ? {} : null,
+            sourcemap: false,
             rollupOptions: {
                 input,
                 output: {
                     entryFileNames: `${inputName}.js`,
-                    dir: outDir
+                    dir: outDir,
+                    sourcemap: false
                 }
             }
         }

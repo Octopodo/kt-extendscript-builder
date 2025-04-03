@@ -5,6 +5,7 @@ import nodeResolve from '@rollup/plugin-node-resolve';
 import babel from '@rollup/plugin-babel';
 import { jsxInclude, jsxPonyfill } from 'vite-cep-plugin';
 import json from '@rollup/plugin-json';
+import terser from '@rollup/plugin-terser';
 
 export function createRollupConfig(options: Partial<BuildOptions> = {}) {
     const input = options.input as string;
@@ -15,14 +16,18 @@ export function createRollupConfig(options: Partial<BuildOptions> = {}) {
     const GLOBAL_THIS = 'thisObj';
     console.log(`Configuring Rollup for ExtendScript: ${input} -> ${output}`);
 
+    const conditionalPlugins = [];
+    if (options.uglify) {
+        conditionalPlugins.push(terser({ output: { comments: false } }));
+    }
     const config: RollupOptions = {
         input: input,
         treeshake: true,
         output: {
             file: output,
-            sourcemap: true,
             footer: `thisObj.KT = KT;`
         },
+
         external: [],
         plugins: [
             json(),
@@ -31,7 +36,6 @@ export function createRollupConfig(options: Partial<BuildOptions> = {}) {
             }),
             babel({
                 extensions,
-                // exclude: /node_modules/,
                 minified: options.minify,
                 babelrc: false,
                 babelHelpers: 'bundled',
@@ -57,7 +61,8 @@ export function createRollupConfig(options: Partial<BuildOptions> = {}) {
             jsxInclude({
                 iife: true,
                 globalThis: GLOBAL_THIS
-            })
+            }),
+            ...conditionalPlugins
         ]
     };
 
