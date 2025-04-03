@@ -48,4 +48,9 @@ describe('Builder', () => {
         process.argv = ['node', 'script.js', ...defaultPaths, '--minify', 'true'];
         await builder.run();
     });
+    it('should uglify the output', async () => {
+        const builder = new Builder();
+        process.argv = ['node', 'script.js', ...defaultPaths, '--uglify', 'true'];
+        await builder.run();
+    });
 });
