@@ -21,8 +21,7 @@ export class Builder {
     }
 
     preprocess() {
-        const parser = new OptionsParser();
-        const options = parser.parse();
+        const options = OptionsParser.parse();
         const redolver = new OptionsResolver();
         this.options = redolver.resolve(options, {});
 

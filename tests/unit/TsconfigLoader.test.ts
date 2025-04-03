@@ -8,18 +8,17 @@ describe('TsconfigLoader', () => {
 
     beforeEach(() => {
         loader = new TsconfigLoader();
-        parser = new OptionsParser();
         process.argv = ['node', 'script.js', '--tsconfig', 'tests/fixtures/basic-project/tsconfig.json'];
     });
     it('should always load tsconfig', () => {
-        const options = parser.parse();
+        const options = OptionsParser.parse();
         const tsconfig = loader.load(options);
         expect(tsconfig).toBeDefined();
     });
     it('should prioritize template', () => {
         process.argv.push('--tsconfig-template', 'true', '--test', 'true');
         const includes = ['src/**/*', 'src/tests/**/*'];
-        const options = parser.parse();
+        const options = OptionsParser.parse();
         const tsconfig = loader.load(options);
         expect(tsconfig).toBeDefined();
         expect(tsconfig.include).toBeDefined();
@@ -29,7 +28,7 @@ describe('TsconfigLoader', () => {
     it('should load tsconfig with custom path', () => {
         process.argv = ['node', 'script.js', '--tsconfig', 'tests/fixtures/basic-project/tsconfig.custom.json'];
 
-        const options = parser.parse();
+        const options = OptionsParser.parse();
         const tsconfig = loader.load(options);
         expect(tsconfig).toBeDefined();
         expect(tsconfig.compilerOptions).toBeDefined();

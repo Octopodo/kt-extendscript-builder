@@ -1,16 +1,13 @@
 import ts from 'typescript';
-import { createViteConfig } from '../../src/lib/builder/createViteConfig';
+import { createViteConfig } from '../../src/lib/config/createViteConfig';
 import { OptionsParser } from '../../src/lib/options/OptionsParser';
-import { OptionsResolver } from '../../src/lib/options/OptionsResolver';
 
 import { describe, expect, it } from 'vitest';
 
 describe('Vite Configuration', () => {
     it('should create a Vite configuration object', () => {
-        const parser = new OptionsParser();
-        const resolver = new OptionsResolver();
         process.argv = ['node', 'script.js', '--input', 'src/index.ts', '--output', 'dist/index.js'];
-        const options = parser.parse();
+        const options = OptionsParser.parse();
 
         const viteConfig = createViteConfig(options);
         expect(viteConfig).toBeDefined();
@@ -18,9 +15,8 @@ describe('Vite Configuration', () => {
     });
 
     it('should set correct input and output paths in config', () => {
-        const parser = new OptionsParser();
         process.argv = ['node', 'script.js', '--input', 'custom/source.ts', '--output', 'custom/output.js'];
-        const options = parser.parse();
+        const options = OptionsParser.parse();
 
         const viteConfig = createViteConfig(options);
         expect(viteConfig.build?.minify).toBe(false);
@@ -33,17 +29,15 @@ describe('Vite Configuration', () => {
     });
 
     it('should set watch mode correctly', () => {
-        const parser = new OptionsParser();
         process.argv = ['node', 'script.js', '--input', 'src/index.ts', '--output', 'dist/index.js', '--watch'];
-        const options = parser.parse();
+        const options = OptionsParser.parse();
 
         const viteConfig = createViteConfig(options);
         expect(viteConfig.build?.watch).toBeDefined();
     });
     it('should set minify option correctly', () => {
-        const parser = new OptionsParser();
         process.argv = ['node', 'script.js', '--input', 'src/index.ts', '--output', 'dist/index.js', '--minify'];
-        const options = parser.parse();
+        const options = OptionsParser.parse();
 
         const viteConfig = createViteConfig(options);
         expect(viteConfig.build?.minify).toBe(true);

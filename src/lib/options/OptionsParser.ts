@@ -18,7 +18,7 @@ export class OptionsParser {
      * @returns A partial BuildOptions object containing the parsed command line options
      */
 
-    parse(): Partial<BuildOptions> {
+    static parse(): Partial<BuildOptions> {
         const userArgs = hideBin(process.argv);
 
         // Modify arguments to include --preset if the first argument is positional

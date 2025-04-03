@@ -17,10 +17,9 @@ describe('OptionsRuleResolver', () => {
     });
 
     it("shouldn't modify the base options object", () => {
-        const parser = new OptionsParser();
-        const baseOptions = parser.parse();
+        const baseOptions = OptionsParser.parse();
         process.argv = ['node', 'script.js', '--input', 'custom/input.ts'];
-        const optionsCopy = parser.parse();
+        const optionsCopy = OptionsParser.parse();
         resolver.resolve(baseOptions);
         expect(baseOptions).not.toBe(optionsCopy);
         expect(baseOptions).not.toEqual(optionsCopy);
