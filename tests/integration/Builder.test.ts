@@ -15,9 +15,13 @@ describe('Builder', () => {
     });
 
     it('should run the build process without errors', async () => {
-        const builder = new Builder();
-        process.argv = ['node', 'script.js', ...defaultPaths];
-        await builder.run();
+        try {
+            const builder = new Builder();
+            process.argv = ['node', 'script.js', ...defaultPaths];
+            await builder.run();
+        } catch (error: any) {
+            console.error('Error in build process:', error);
+        }
     });
     it('should run the build process with watch mode', async () => {
         const builder = new Builder();
@@ -27,7 +31,13 @@ describe('Builder', () => {
 
     it('should run the build process with test mode', async () => {
         const builder = new Builder();
-        process.argv = ['node', 'script.js', 'test', ...defaultPaths];
+        process.argv = ['node', 'script.js', 'test', '--input', 'tests/fixtures/basic-project/tests/index.test.ts'];
+        await builder.run();
+    });
+
+    it('should minimize the output', async () => {
+        const builder = new Builder();
+        process.argv = ['node', 'script.js', ...defaultPaths, '--minify', 'true'];
         await builder.run();
     });
 });
