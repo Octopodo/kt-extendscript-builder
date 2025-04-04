@@ -6,13 +6,14 @@ import babel from '@rollup/plugin-babel';
 import { jsxInclude, jsxPonyfill } from 'vite-cep-plugin';
 import json from '@rollup/plugin-json';
 import terser from '@rollup/plugin-terser';
+import { basePonyfills } from '../ponyfills/basePonyfills';
 
 export function createRollupConfig(options: Partial<BuildOptions> = {}) {
     const input = options.input as string;
     const output = options.output as string;
     const extensions = ['.js', '.ts', '.tsx'];
     const ponyfillCollector = new PonyfillCollector();
-    const ponyfills = ponyfillCollector.collect(options.ponyfills);
+    const ponyfills = [...ponyfillCollector.collect(options.ponyfills), ...basePonyfills];
     const GLOBAL_THIS = 'thisObj';
     console.log(`Configuring Rollup for ExtendScript: ${input} -> ${output}`);
 
