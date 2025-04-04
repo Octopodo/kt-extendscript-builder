@@ -1,5 +1,6 @@
 import { presets } from './optionsPresets';
-import { BuildOptions } from '../types';
+import { BuildOptions } from '../../types';
+import { ConfigLoader } from '../config/ConfigLoader';
 import path from 'path';
 import fs from 'fs';
 /**
@@ -39,16 +40,13 @@ export class OptionsPresetsResolver {
     }
 
     getUserPresets(userConfigPath: string): void {
-        const userPresets: Record<string, Partial<BuildOptions>> = {};
-        const userPresetsPath = path.resolve(process.cwd(), userConfigPath);
-        if (fs.existsSync(userPresetsPath)) {
-            const content = fs.readFileSync(userPresetsPath, 'utf-8');
-            const config = JSON.parse(content);
-            for (const [key, value] of Object.entries(config)) {
-                const preset = value as Partial<BuildOptions>;
-                if (preset) {
-                    this.presets[key] = preset;
-                }
+        const loader = new ConfigLoader();
+        const userPresets = loader.load(userConfigPath);
+
+        for (const [key, value] of Object.entries(userPresets)) {
+            const preset = value as Partial<BuildOptions>;
+            if (preset && !this.presets[key]) {
+                this.presets[key] = preset;
             }
         }
     }
