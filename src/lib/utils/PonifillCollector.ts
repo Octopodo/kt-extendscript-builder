@@ -1,6 +1,6 @@
 import fs from 'fs';
 import path from 'path';
-import { basePonyfills } from '../../ponyfills/basePonyfills';
+import { basePonyfills } from '../ponyfills/basePonyfills';
 import { PonyfillItem } from '../../types';
 
 export class PonyfillCollector {
@@ -41,8 +41,12 @@ export class PonyfillCollector {
     private loadPonyfills(ponyfillsPath: string): PonyfillItem[] {
         if (!ponyfillsPath) return [];
         const absolutePath = path.resolve(process.cwd(), ponyfillsPath); // Siempre relativo a cwd
-        const ponyfillModule = require(absolutePath); // Puede lanzar error si falla
-        return this.selectPonyfills(ponyfillModule);
+        try {
+            const ponyfillModule = import(absolutePath); // Puede lanzar error si falla
+            return this.selectPonyfills(ponyfillModule);
+        } catch (error) {
+            throw new Error(`Error loading ponyfills from ${ponyfillsPath}: ${error}`);
+        }
     }
 
     /**
