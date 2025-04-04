@@ -98,7 +98,7 @@ export const postprocessorOptions = [
 export const configOptions = [
     {
         name: 'config-file',
-        alias: ['f', 'configFile'],
+        alias: ['f', 'configFile', 'config-path'],
         type: 'string',
         description: 'Path to config file',
         default: 'kt.config.json'
