@@ -53,4 +53,16 @@ describe('Builder', () => {
         process.argv = ['node', 'script.js', ...defaultPaths, '--uglify', 'true'];
         await builder.run();
     });
+    it('should build with custom config', async () => {
+        const builder = new Builder();
+        process.argv = [
+            'node',
+            'script.js',
+            '--config-path',
+            'tests/fixtures/basic-project/kt.config.json',
+            '--preset',
+            'my-ae-preset'
+        ];
+        await builder.run();
+    });
 });

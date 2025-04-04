@@ -1,0 +1,22 @@
+{
+    "build": {
+        "input": "src/index.ts",
+        "output": "dist/index.js",
+        "test": false
+    },
+    "watch": {
+        "input": "src/index.ts",
+        "output": "dist/index.js",
+        "watch": true,
+        "test": false
+    },
+    "test": {
+        "input": "src/tests/index.test.ts",
+        "output": "dist.test/index.test.js",
+        "test": true
+    },
+    "bolt": {
+        "input": "src/jsx/index.ts",
+        "oputput": "./jsx/index.js"
+    }
+}

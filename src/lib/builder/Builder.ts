@@ -4,6 +4,7 @@ import { createViteConfig } from '../config/createViteConfig';
 import { createRollupConfig } from '../config/createRollupConfig';
 import { ExtendedViteConfig } from '../../types';
 import { defineConfig, build as viteBuild } from 'vite';
+import { ConfigLoader } from '../config/ConfigLoader';
 
 export class Builder {
     private options: Partial<BuildOptions> = {};
@@ -22,8 +23,11 @@ export class Builder {
 
     preprocess() {
         const options = OptionsParser.parse();
-        const redolver = new OptionsResolver();
-        this.options = redolver.resolve(options, {});
+        const configLoader = new ConfigLoader();
+        configLoader.load(options['config-file']);
+        const userConfig = configLoader.getConfig(options.preset as string);
+        const resolver = new OptionsResolver();
+        this.options = resolver.resolve(options, userConfig);
 
         const viteConfig = createViteConfig(this.options);
         viteConfig.extendScriptConfig = createRollupConfig(this.options);
