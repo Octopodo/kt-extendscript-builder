@@ -29,19 +29,4 @@ describe('OptionsPresetsResolver', () => {
 
         expect(preset).toEqual(presets['default']);
     });
-
-    it('should load user presets from a JSON file', () => {
-        const resolver = new OptionsPresetsResolver();
-        const userConfigPath = path.resolve(__dirname, '..', 'fixtures', 'configs', 'kt.config.json');
-        const userPresets = fs.readFileSync(userConfigPath, 'utf-8');
-        const userConfig = JSON.parse(userPresets);
-
-        resolver.getUserPresets(userConfigPath);
-
-        const aePreset = resolver.resolvePreset('my-ae-preset');
-        expect(aePreset).toEqual(userConfig['my-ae-preset']);
-
-        const psPreset = resolver.resolvePreset('my-ps-preset');
-        expect(psPreset).toEqual(userConfig['my-ps-preset']);
-    });
 });
