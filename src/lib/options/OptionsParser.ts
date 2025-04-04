@@ -38,7 +38,7 @@ export class OptionsParser {
         return argv.help().parse() as Partial<BuildOptions>;
     }
 
-    static filter(options: Record<string, any>): Record<string, any> {
+    static filter(options: Record<string, any>): Partial<BuildOptions> {
         const validOptions = KTBuilderOptions.map((option) => option.name);
         const filteredOptions: Partial<BuildOptions> = {};
         for (const key in options) {
