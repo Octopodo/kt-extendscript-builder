@@ -19,10 +19,11 @@ export class ConfigLoader {
         const fileContent = fs.readFileSync(absolutePath, 'utf-8');
         try {
             config = JSON.parse(fileContent);
-            this._configurations = ConfigLoader.filter(config);
+            this._configurations = { ...this._configurations, ...ConfigLoader.filter(config) };
             return this._configurations;
         } catch (error: any) {
-            throw new Error(`Error al parsear el archivo de configuración en ${absolutePath}: ${error.message}`);
+            console.warn(`Error al parsear el archivo de configuración en ${absolutePath}: ${error.message}`);
+            return {};
         }
     }
 
