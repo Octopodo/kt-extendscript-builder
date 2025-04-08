@@ -1,4 +1,4 @@
-import { BuildOptions, DependencyRule } from '../types';
+import { BuildOptions, DependencyRule } from '../../types';
 import { baseOptionsRules, adobeOptionsRules } from './rules';
 
 /**
