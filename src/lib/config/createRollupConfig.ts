@@ -7,6 +7,7 @@ import { jsxInclude, jsxPonyfill } from 'vite-cep-plugin';
 import json from '@rollup/plugin-json';
 import terser from '@rollup/plugin-terser';
 import { basePonyfills } from '../ponyfills/basePonyfills';
+import { rollupRemoveExports } from '../plugins/rollupRemoveExports';
 
 export function createRollupConfig(options: Partial<BuildOptions> = {}) {
     const input = options.input as string;
@@ -19,7 +20,15 @@ export function createRollupConfig(options: Partial<BuildOptions> = {}) {
 
     const conditionalPlugins = [];
     if (options.uglify) {
-        conditionalPlugins.push(terser({ output: { comments: false } }));
+        conditionalPlugins.push(
+            terser({
+                compress: {
+                    conditionals: false,
+                    drop_console: options.mode === 'production'
+                },
+                output: { comments: false }
+            })
+        );
     }
     const config: RollupOptions = {
         input: input,
@@ -63,6 +72,7 @@ export function createRollupConfig(options: Partial<BuildOptions> = {}) {
                 iife: true,
                 globalThis: GLOBAL_THIS
             }),
+            rollupRemoveExports(),
             ...conditionalPlugins
         ]
     };
