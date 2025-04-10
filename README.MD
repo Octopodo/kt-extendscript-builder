@@ -8,8 +8,6 @@ KT ExtendScript Builder is a specialized tool designed to simplify the process o
 -   ES3 target support for maximum compatibility with Adobe apps
 -   Development and production build modes
 -   Watch mode for real-time development
--   Built-in TypeScript templates for quick setup
--   Support for custom TypeScript configurations
 -   Command-line interface for easy integration into workflows
 -   Custom ponyfills support for extending ExtendScript compatibility
 -   Adobe application type definitions integration
