@@ -2,7 +2,8 @@
     "build": {
         "input": "src/index.ts",
         "output": "dist/index.js",
-        "test": false
+        "test": false,
+        "mode": "production"
     },
     "watch": {
         "input": "src/index.ts",
