@@ -1,8 +1,7 @@
 import { presets } from './optionsPresets';
 import { BuildOptions } from '../../types';
 import { ConfigLoader } from '../config/ConfigLoader';
-import path from 'path';
-import fs from 'fs';
+
 /**
  * Class responsible for resolving preset build options.
  *
