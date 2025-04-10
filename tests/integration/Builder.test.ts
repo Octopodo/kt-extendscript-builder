@@ -1,6 +1,16 @@
 import { time } from 'console';
 import { Builder } from '../../src/lib/builder/Builder';
 import { describe, expect, it } from 'vitest';
+import path from 'path';
+import fs from 'fs';
+
+function loadFile(filePath: string) {
+    const absolutePath = path.resolve(process.cwd(), filePath);
+    if (fs.existsSync(absolutePath)) {
+        return fs.readFileSync(absolutePath, 'utf-8');
+    }
+    return '';
+}
 
 const defaultPaths = [
     '--input',
@@ -50,12 +60,17 @@ describe('Builder', () => {
             'script.js',
             '--input',
             'tests/fixtures/basic-project/src/index.ts',
-            '--uglify',
+            '--minify',
             'true',
             '--output',
             'tests/fixtures/basic-project/dist/minified/index.js'
         ];
         await builder.run();
+        const buildFile = loadFile('tests/fixtures/basic-project/dist/minified/index.js');
+        const checkFile = loadFile('tests/fixtures/outputs/index-mini.js');
+        const uglyFile = loadFile('tests/fixtures/outputs/index-ugly.js');
+        expect(buildFile).toBe(checkFile);
+        expect(buildFile).not.toBe(uglyFile);
     });
     it('should uglify the output', async () => {
         const builder = new Builder();
@@ -70,6 +85,11 @@ describe('Builder', () => {
             'tests/fixtures/basic-project/dist/uglyfied/index.js'
         ];
         await builder.run();
+        const buildFile = loadFile('tests/fixtures/basic-project/dist/uglyfied/index.js');
+        const checkFile = loadFile('tests/fixtures/outputs/index-ugly.js');
+        const miniFile = loadFile('tests/fixtures/outputs/index-mini.js');
+        expect(buildFile).toBe(checkFile);
+        expect(buildFile).not.toBe(miniFile);
     });
     it('should build with custom config', async () => {
         const builder = new Builder();
@@ -82,5 +102,6 @@ describe('Builder', () => {
             'my-ae-preset'
         ];
         await builder.run();
+        expect(fs.existsSync('tests/fixtures/basic-project/dist/my-custom-ae-output/index.js')).toBe(true);
     });
 });
