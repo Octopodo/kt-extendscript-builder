@@ -3,7 +3,8 @@ import { Builder } from '../../src/lib/builder/Builder';
 import { describe, expect, it } from 'vitest';
 import path from 'path';
 import fs from 'fs';
-
+import { CommandRegistry } from '../../src/lib/commands/CommandRegistry';
+import { TestsBuildCommand, TestsBuildTestsCommand } from '../../src/lib/commands/BaseCommands';
 function loadFile(filePath: string) {
     const absolutePath = path.resolve(process.cwd(), filePath);
     if (fs.existsSync(absolutePath)) {
@@ -103,5 +104,15 @@ describe('Builder', () => {
         ];
         await builder.run();
         expect(fs.existsSync('tests/fixtures/basic-project/dist/my-custom-ae-output/index.js')).toBe(true);
+    });
+    it('should chain builds', async () => {
+        const registry = new CommandRegistry();
+        registry.registerCommand(new TestsBuildCommand());
+        registry.registerCommand(new TestsBuildTestsCommand());
+        const builder = new Builder(registry);
+        process.argv = ['node', 'script.js', 'tests-build', 'tests-build-tests'];
+        await builder.run();
+        const buildFile = loadFile('tests/fixtures/basic-project/dist/index.js');
+        const testFile = loadFile('dist.test/index.test.js');
     });
 });
