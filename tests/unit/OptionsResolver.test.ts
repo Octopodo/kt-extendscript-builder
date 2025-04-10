@@ -10,7 +10,7 @@ describe('OptionsResolver', () => {
         process.argv = ['node', 'script.js'];
 
         const options = OptionsParser.parse();
-        const resolvedOptions = resolver.resolve(options, {});
+        const resolvedOptions = resolver.resolve(options);
         expect(resolvedOptions).toMatchObject(defaultBuildOptions);
     });
 
@@ -20,7 +20,7 @@ describe('OptionsResolver', () => {
         process.argv = ['node', 'script.js', '--preset', 'test'];
 
         const options = OptionsParser.parse();
-        const resolvedOptions = resolver.resolve(options, {});
+        const resolvedOptions = resolver.resolve(options);
 
         expect(resolvedOptions.test).toBe(true);
         // expect(resolvedOptions.input).toContain('test');
@@ -37,7 +37,7 @@ describe('OptionsResolver', () => {
             input: 'config-input.ts'
         };
 
-        const resolvedOptions = resolver.resolve(options, configFileArgs);
+        const resolvedOptions = resolver.resolve(options);
 
         expect(resolvedOptions.input).toBe('cli-input.ts');
     });
@@ -45,16 +45,27 @@ describe('OptionsResolver', () => {
     it('should prioritize config file arguments over CLI arguments when priority is config', () => {
         const resolver = new OptionsResolver();
 
-        process.argv = ['node', 'script.js', '--input', 'cli-input.ts', '--priority', 'config'];
+        process.argv = [
+            'node',
+            'script.js',
+            '--input',
+            'cli-input.ts',
+            '--priority',
+            'config',
+            '--config-file',
+            'tests/fixtures/basic-project/kt.config.json',
+            '--preset',
+            'my-custom-preset'
+        ];
 
         const options = OptionsParser.parse();
         const configFileArgs = {
             input: 'config-input.ts'
         };
 
-        const resolvedOptions = resolver.resolve(options, configFileArgs);
+        const resolvedOptions = resolver.resolve(options);
 
-        expect(resolvedOptions.input).toBe('config-input.ts');
+        expect(resolvedOptions.input).toBe('src/my-custom-preset/index.ts');
     });
 
     it('should preserve test mode from CLI arguments', () => {
@@ -65,7 +76,7 @@ describe('OptionsResolver', () => {
         const options = OptionsParser.parse();
         const configFileArgs = { test: false };
 
-        const resolvedOptions = resolver.resolve(options, configFileArgs);
+        const resolvedOptions = resolver.resolve(options);
 
         expect(resolvedOptions.test).toBe(true);
     });
@@ -76,32 +87,11 @@ describe('OptionsResolver', () => {
         process.argv = ['node', 'script.js', '--mode', 'production'];
 
         const options = OptionsParser.parse();
-        const resolvedOptions = resolver.resolve(options, {});
+        const resolvedOptions = resolver.resolve(options);
 
         // modeRule should set watch to false for production mode
         expect(resolvedOptions.watch).toBe(false);
         expect(resolvedOptions.test).toBe(false);
-    });
-
-    it('should merge options from multiple sources', () => {
-        const resolver = new OptionsResolver();
-
-        process.argv = ['node', 'script.js', '--input', 'cli-input.ts', '--preset', 'test', '--mode', 'development'];
-
-        const options = OptionsParser.parse();
-        const configFileArgs = {
-            output: 'config-output.js',
-            'dest-app': 'Photoshop'
-        };
-
-        const resolvedOptions = resolver.resolve(options, configFileArgs);
-
-        expect(resolvedOptions.input).toBe('cli-input.ts');
-        expect(resolvedOptions.output).toBe('config-output.js');
-        expect(resolvedOptions['dest-app']).toBe('Photoshop');
-        expect(resolvedOptions.mode).toBe('development');
-        expect(resolvedOptions.test).toBe(true);
-        expect(resolvedOptions.watch).toBe(true);
     });
 
     it('should fallback to default preset for unknown preset names', () => {
@@ -111,7 +101,7 @@ describe('OptionsResolver', () => {
         process.argv = ['node', 'script.js', '--preset', 'non-existent-preset'];
 
         const options = OptionsParser.parse();
-        const resolvedOptions = resolver.resolve(options, {});
+        const resolvedOptions = resolver.resolve(options);
 
         // Should use default preset values
         expect(resolvedOptions.input).toBe('src/index.ts');

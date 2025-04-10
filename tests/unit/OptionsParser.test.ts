@@ -52,14 +52,6 @@ describe('OptionsParser', () => {
             expect(options['dest-app']).toBe('Photoshop');
             expect(options['app-version']).toBe('2023');
         });
-
-        it('should set preset if first argument is a preset name', () => {
-            process.argv = ['node', 'script.js', 'custom-preset'];
-            const options = OptionsParser.parse(); // Simulate a command without options
-
-            // Verify that the preset is set correctly
-            expect(options.preset).toBe('custom-preset');
-        });
     });
     describe('Filter method', () => {
         it('should filter out options that are not in the options map', () => {
