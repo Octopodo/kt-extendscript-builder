@@ -33,6 +33,7 @@ export class OptionsPresetsResolver {
     resolvePreset(presetName: string): Partial<BuildOptions> {
         const preset = this.presets[presetName];
         if (!preset) {
+            console.warn(`Preset "${presetName}" not found. Using default preset.`);
             return this.presets['default'];
         }
         return preset;
