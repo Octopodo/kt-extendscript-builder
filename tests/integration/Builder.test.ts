@@ -26,36 +26,30 @@ describe('Builder', () => {
     });
 
     it('should run the build process without errors', async () => {
-        async function build() {
+        process.argv = ['node', 'script.js', ...defaultPaths];
+
+        try {
             const builder = new Builder();
             process.argv = ['node', 'script.js', ...defaultPaths];
-
-            try {
-                const builder = new Builder();
-                process.argv = ['node', 'script.js', ...defaultPaths];
-                await builder.run();
-            } catch (error: any) {
-                console.error('Error in build process:', error);
-            }
+            await builder.run();
+        } catch (error: any) {
+            console.error('Error in build process:', error);
         }
-
-        expect(build).not.toThrowError();
     });
 
     it('should run the build process with watch mode', async () => {
-        const builder = new Builder();
         process.argv = ['node', 'script.js', ...defaultPaths, '--watch', 'true', '--mode', 'development'];
+        const builder = new Builder();
         const watcher = await builder.run();
     });
 
     it('should run the build process with test mode', async () => {
-        const builder = new Builder();
         process.argv = ['node', 'script.js', 'test', '--input', 'tests/fixtures/basic-project/tests/index.test.ts'];
+        const builder = new Builder();
         await builder.run();
     });
 
     it('should minimize the output', async () => {
-        const builder = new Builder();
         process.argv = [
             'node',
             'script.js',
@@ -66,6 +60,7 @@ describe('Builder', () => {
             '--output',
             'tests/fixtures/basic-project/dist/minified/index.js'
         ];
+        const builder = new Builder();
         await builder.run();
         const buildFile = loadFile('tests/fixtures/basic-project/dist/minified/index.js');
         const checkFile = loadFile('tests/fixtures/outputs/index-mini.js');
@@ -74,7 +69,6 @@ describe('Builder', () => {
         expect(buildFile).not.toBe(uglyFile);
     });
     it('should uglify the output', async () => {
-        const builder = new Builder();
         process.argv = [
             'node',
             'script.js',
@@ -85,6 +79,7 @@ describe('Builder', () => {
             '--output',
             'tests/fixtures/basic-project/dist/uglyfied/index.js'
         ];
+        const builder = new Builder();
         await builder.run();
         const buildFile = loadFile('tests/fixtures/basic-project/dist/uglyfied/index.js');
         const checkFile = loadFile('tests/fixtures/outputs/index-ugly.js');
@@ -93,7 +88,6 @@ describe('Builder', () => {
         expect(buildFile).not.toBe(miniFile);
     });
     it('should build with custom config', async () => {
-        const builder = new Builder();
         process.argv = [
             'node',
             'script.js',
@@ -102,15 +96,23 @@ describe('Builder', () => {
             '--preset',
             'my-ae-preset'
         ];
+        const builder = new Builder();
         await builder.run();
         expect(fs.existsSync('tests/fixtures/basic-project/dist/my-custom-ae-output/index.js')).toBe(true);
     });
     it('should chain builds', async () => {
-        const registry = new CommandRegistry();
-        registry.registerCommand(new TestsBuildCommand());
-        registry.registerCommand(new TestsBuildTestsCommand());
-        const builder = new Builder(registry);
-        process.argv = ['node', 'script.js', 'tests-build', 'tests-build-tests'];
+        process.argv = [
+            'node',
+            'script.js',
+            'tests-build',
+            'tests-build-tests',
+            '--config-file',
+            'tests/fixtures/basic-project/kt.config.json'
+        ];
+        const commandRegistry = new CommandRegistry();
+        commandRegistry.registerCommand(new TestsBuildCommand());
+        commandRegistry.registerCommand(new TestsBuildTestsCommand());
+        const builder = new Builder(commandRegistry);
         await builder.run();
         const buildFile = loadFile('tests/fixtures/basic-project/dist/index.js');
         const testFile = loadFile('dist.test/index.test.js');

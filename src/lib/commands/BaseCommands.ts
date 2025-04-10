@@ -5,7 +5,7 @@ import { presets } from '../options/optionsPresets';
 /**
  * Base class for simple commands that just apply options
  */
-export abstract class BaseCommand implements Command {
+export class BaseCommand implements Command {
     constructor(
         public readonly name: string,
         public readonly description: string,
@@ -113,4 +113,15 @@ export class AdobeAppCommand extends BaseCommand {
     }
 }
 
+// Export specific command classes that may need direct instantiation
+export const CommandClasses = {
+    DefaultCommand,
+    BuildCommand,
+    DevCommand,
+    TestCommand,
+    MinifyCommand,
+    UglifyCommand
+};
+
+// Export base commands for backwards compatibility
 export const baseCommands = [DefaultCommand, BuildCommand, DevCommand, TestCommand, MinifyCommand, UglifyCommand];

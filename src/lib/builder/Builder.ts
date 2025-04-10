@@ -5,7 +5,7 @@ import { createRollupConfig } from '../config/createRollupConfig';
 import { ExtendedViteConfig } from '../../types';
 import { defineConfig, build as viteBuild } from 'vite';
 import { CommandRegistry } from '../commands/CommandRegistry';
-import { baseCommands, type BaseCommand } from '../commands/BaseCommands';
+import { CommandGenerator } from '../commands/CommandGenerator';
 
 export class Builder {
     private options: Partial<BuildOptions> = {};
@@ -15,16 +15,19 @@ export class Builder {
     constructor(commandRegistry?: CommandRegistry) {
         // Initialize command registry with predefined commands
         this.commandRegistry = commandRegistry || new CommandRegistry();
-        this.registerPredefinedCommands();
+        this.registerAllCommands();
     }
 
     /**
-     * Register all predefined commands
+     * Register all commands from presets and config file
      */
-    private registerPredefinedCommands(): void {
-        for (const command of baseCommands) {
-            this.commandRegistry.registerCommand(new command());
-        }
+    private registerAllCommands(): void {
+        // Parse CLI to check if custom config file is specified
+        const initialOptions = OptionsParser.parse();
+        const configFile = initialOptions['config-file'] as string;
+
+        // Register both preset commands and config file commands
+        CommandGenerator.registerAllCommands(this.commandRegistry, configFile);
     }
 
     /**

@@ -17,37 +17,20 @@ export class OptionsParser {
      *
      * @returns A partial BuildOptions object containing the parsed command line options
      */
+
     static parse(): Partial<BuildOptions> {
         const userArgs = hideBin(process.argv);
 
-        // Filter out command arguments (non-flag arguments)
-        // These will be handled by the CommandRegistry
-        const flagArgs = userArgs.filter((arg, index) => {
-            if (arg.startsWith('-')) return true;
+        // Modify arguments to include --preset if the first argument is positional
+        let modifiedArgs = [...userArgs];
+        if (userArgs.length > 0 && !userArgs[0].startsWith('-')) {
+            const presetValue = userArgs[0];
+            // Add --preset <value> at the beginning of the arguments and remove the positional argument
+            modifiedArgs = ['--preset', presetValue, ...userArgs.slice(1)];
+        }
 
-            // If previous arg is a flag param that expects a value, keep this arg
-            if (index > 0 && userArgs[index - 1].startsWith('-') && !userArgs[index - 1].includes('=')) return true;
-
-            // Check if this is a subsequent value for an array option
-            // Look for the parameter name in KTBuilderOptions to check if it's an array type
-            if (index > 1) {
-                const prevArg = userArgs[index - 1];
-                const prevArgIsValue = !prevArg.startsWith('-');
-                const paramNameIndex = prevArgIsValue ? index - 2 : index - 1;
-
-                if (paramNameIndex >= 0) {
-                    const paramName = userArgs[paramNameIndex].replace(/^--?/, '');
-                    const option = KTBuilderOptions.find((opt) => opt.name === paramName || opt.alias === paramName);
-                    if (option && option.type === 'array' && prevArgIsValue) return true;
-                }
-            }
-
-            // Otherwise it's potentially a command
-            return false;
-        });
-
-        // Create yargs instance with filtered arguments
-        const argv = yargs(flagArgs);
+        // Create yargs instance with the modified arguments
+        const argv = yargs(modifiedArgs);
         for (const option of KTBuilderOptions) {
             argv.option(option.name, option);
         }
@@ -55,11 +38,6 @@ export class OptionsParser {
         return argv.help().parse() as Partial<BuildOptions>;
     }
 
-    /**
-     * Filter an object to only include properties that are valid BuildOptions
-     * @param options An object with potential additional properties
-     * @returns An object containing only valid BuildOptions properties
-     */
     static filter(options: Record<string, any>): Partial<BuildOptions> {
         const validOptions = KTBuilderOptions.map((option) => option.name);
         const filteredOptions: Partial<BuildOptions> = {};
