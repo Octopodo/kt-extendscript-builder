@@ -45,12 +45,30 @@ describe('Builder', () => {
 
     it('should minimize the output', async () => {
         const builder = new Builder();
-        process.argv = ['node', 'script.js', ...defaultPaths, '--minify', 'true'];
+        process.argv = [
+            'node',
+            'script.js',
+            '--input',
+            'tests/fixtures/basic-project/src/index.ts',
+            '--uglify',
+            'true',
+            '--output',
+            'tests/fixtures/basic-project/dist/minified/index.js'
+        ];
         await builder.run();
     });
     it('should uglify the output', async () => {
         const builder = new Builder();
-        process.argv = ['node', 'script.js', ...defaultPaths, '--uglify', 'true'];
+        process.argv = [
+            'node',
+            'script.js',
+            '--input',
+            'tests/fixtures/basic-project/src/index.ts',
+            '--uglify',
+            'true',
+            '--output',
+            'tests/fixtures/basic-project/dist/uglyfied/index.js'
+        ];
         await builder.run();
     });
     it('should build with custom config', async () => {
