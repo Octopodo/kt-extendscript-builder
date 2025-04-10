@@ -1,4 +1,9 @@
 {
+    "my-custom-preset": {
+        "input": "src/my-custom-preset/index.ts",
+        "output": "dist/my-custom-preset/index.js",
+        "dest-app": "aftereffects"
+    },
     "my-ae-preset": {
         "input": "tests/fixtures/basic-project/src/index.ts",
         "output": "tests/fixtures/basic-project/dist/my-custom-ae-output/index.js",
