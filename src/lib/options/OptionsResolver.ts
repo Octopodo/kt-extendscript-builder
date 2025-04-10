@@ -1,6 +1,7 @@
 import { BuildOptions, defaultBuildOptions } from '../../types';
 import { OptionsRuleResolver } from './OptionsRuleResolver';
 import { OptionsPresetsResolver } from './OptionsPresetsResolver';
+import { ConfigLoader } from '../config/ConfigLoader';
 /**
  * Manages the resolution of build options by merging defaults, presets, config files, and CLI arguments.
  *
@@ -26,9 +27,12 @@ export class OptionsResolver {
      * @param configFileArgs - Arguments loaded from a configuration file
      * @returns Merged build options with all rules applied
      */
-    resolve(cliArgs: Record<string, any>, configFileArgs: Partial<BuildOptions>): Partial<BuildOptions> {
-        let options = { ...defaultBuildOptions, ...this.resolvePreset(cliArgs.preset) };
-        const defaultPreset = this.resolvePreset('default');
+    resolve(cliArgs: Record<string, any>): Partial<BuildOptions> {
+        const presetResolver = new OptionsPresetsResolver();
+        presetResolver.getUserPresets(cliArgs['config-file']);
+        const defaultPreset = presetResolver.resolvePreset('default');
+        const userPreset = presetResolver.resolvePreset(cliArgs.preset || 'default');
+        let options = { ...defaultBuildOptions, ...defaultPreset };
 
         // let testMode;
         // if (cliArgs.test) {
@@ -38,9 +42,9 @@ export class OptionsResolver {
         const priority = cliArgs.priority.toLowerCase() || 'cli';
 
         if (priority === 'cli') {
-            options = { ...defaultPreset, ...options, ...configFileArgs, ...cliArgs };
+            options = { ...defaultPreset, ...options, ...userPreset, ...cliArgs };
         } else {
-            options = { ...defaultPreset, ...options, ...cliArgs, ...configFileArgs };
+            options = { ...defaultPreset, ...options, ...cliArgs, ...userPreset };
         }
 
         // options.test = testMode;
@@ -58,18 +62,6 @@ export class OptionsResolver {
     resolveRules(options: Partial<BuildOptions>): Partial<BuildOptions> {
         const resolver = new OptionsRuleResolver();
         const preset = resolver.resolve({ ...options });
-        return preset;
-    }
-
-    /**
-     * Retrieves a preset configuration by name
-     *
-     * @param presetName - Name of the preset to retrieve
-     * @returns The preset's build options or undefined if not found
-     */
-    resolvePreset(presetName: string): Partial<BuildOptions> {
-        const resolver = new OptionsPresetsResolver();
-        const preset = resolver.resolvePreset(presetName);
         return preset;
     }
 }
