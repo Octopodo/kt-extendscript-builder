@@ -23,11 +23,8 @@ export class Builder {
 
     preprocess() {
         const options = OptionsParser.parse();
-        const configLoader = new ConfigLoader();
-        configLoader.load(options['config-file']);
-        const userConfig = configLoader.getConfig(options.preset as string);
         const resolver = new OptionsResolver();
-        this.options = resolver.resolve(options, userConfig);
+        this.options = resolver.resolve(options);
 
         const viteConfig = createViteConfig(this.options);
         viteConfig.extendScriptConfig = createRollupConfig(this.options);
