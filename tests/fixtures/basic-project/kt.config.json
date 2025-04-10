@@ -1,12 +1,12 @@
 {
     "my-ae-preset": {
         "input": "tests/fixtures/basic-project/src/index.ts",
-        "output": "dist/my-custom-ae-output/index.js",
+        "output": "tests/fixtures/basic-project/dist/my-custom-ae-output/index.js",
         "dest-app": "aftereffects"
     },
     "my-ps-preset": {
         "input": "tests/fixtures/basic-project/src/index.ts",
-        "output": "dist/my-custom-ps-output.js",
+        "output": "tests/fixtures/basic-project/dist/my-custom-ps-output.js",
         "dest-app": "photoshop"
     }
 }
