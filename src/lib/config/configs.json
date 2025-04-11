@@ -19,5 +19,9 @@
     "bolt": {
         "input": "src/jsx/index.ts",
         "oputput": "./jsx/index.js"
+    },
+    "clean-only": {
+        "clean": true,
+        "clean-only": true
     }
 }

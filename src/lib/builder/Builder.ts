@@ -6,6 +6,7 @@ import { ExtendedViteConfig } from '../../types';
 import { defineConfig, build as viteBuild } from 'vite';
 import { CommandRegistry } from '../commands/CommandRegistry';
 import { CommandGenerator } from '../commands/CommandGenerator';
+import { Cleaner } from './Cleaner';
 
 export class Builder {
     private options: Partial<BuildOptions> = {};
@@ -31,58 +32,118 @@ export class Builder {
     }
 
     /**
+     * Determina si se debe limpiar el directorio según las opciones
+     * @param options Opciones de construcción
+     * @param stage Etapa del proceso (before/after)
+     * @returns true si se debe limpiar, false en caso contrario
+     */
+    private shouldClean(stage: 'before' | 'after'): boolean {
+        if (!this.options.clean) return false;
+
+        // Si es un string, convertir a array para procesamiento uniforme
+        const cleanOption =
+            typeof this.options.clean === 'string'
+                ? [this.options.clean]
+                : Array.isArray(this.options.clean)
+                ? this.options.clean
+                : [];
+
+        // Si se especificó 'false', no limpiar nada
+        if (cleanOption.includes('false')) return false;
+
+        // Limpiar si se especificó 'both' o la etapa específica
+        return cleanOption.includes('both') || cleanOption.includes(stage);
+    }
+
+    /**
+     * Limpia el directorio de salida si es necesario según la configuración
+     */
+    private async cleanIfNeeded(stage: 'before' | 'after'): Promise<void> {
+        if (this.shouldClean(stage)) {
+            console.log(`Iniciando limpieza (${stage})...`);
+            await Cleaner.cleanDist(this.options);
+        }
+    }
+
+    /**
+     * Ejecuta la compilación según las opciones configuradas
+     */
+    private async executeBuild(): Promise<void> {
+        try {
+            // Configure build
+            await this.configureBuild();
+
+            // Execute build or watch
+            if (this.options.watch) {
+                await this.watch();
+            } else {
+                await this.build();
+            }
+        } catch (error) {
+            console.error('Error during build process:', error);
+        }
+    }
+
+    /**
+     * Procesa un comando específico con sus opciones
+     */
+    private async processCommand(commandName: string, initialOptions: Partial<BuildOptions>): Promise<void> {
+        console.log(`Executing command: ${commandName}`);
+
+        // Get options for this specific command
+        const commandOptions = this.commandRegistry.executeCommand(commandName, {});
+
+        // Merge command options with CLI options
+        this.options = this.mergeOptionsWithPriority(commandOptions, initialOptions);
+
+        // Proceso principal de build con limpieza
+        await this.cleanIfNeeded('before');
+        if (commandName !== 'clean-only') {
+            await this.executeBuild();
+        }
+        await this.cleanIfNeeded('after');
+
+        console.log(`Command ${commandName} completed.`);
+    }
+
+    /**
+     * Procesa las opciones sin comandos específicos
+     */
+    private async processWithoutCommands(initialOptions: Partial<BuildOptions>): Promise<void> {
+        // Traditional option resolution
+        this.options = this.resolveOptionsTraditionally(initialOptions);
+
+        // Proceso principal de build con limpieza
+        await this.cleanIfNeeded('before');
+        await this.executeBuild();
+        await this.cleanIfNeeded('after');
+    }
+
+    /**
      * Runs the build process with the current configuration
      * Supports command chaining when commands are passed as positional arguments
      */
     async run(): Promise<void> {
-        // Parse all CLI arguments, including commands and options
+        // Parse all CLI arguments
         const initialOptions = OptionsParser.parse();
 
-        // Check if there are any commands in the positional arguments
+        // Extract commands from arguments
         const commands = this.extractCommandsFromArgs();
 
         if (commands.length > 0) {
             console.log(`Found commands to execute: ${commands.join(', ')}`);
 
-            // Execute each command sequentially
+            // Process each command sequentially
             for (const commandName of commands) {
                 if (this.commandRegistry.hasCommand(commandName)) {
-                    console.log(`Executing command: ${commandName}`);
-
-                    // Get options for this specific command
-                    const commandOptions = this.commandRegistry.executeCommand(commandName, {});
-
-                    // Merge command options with CLI options
-                    this.options = this.mergeOptionsWithPriority(commandOptions, initialOptions);
-
-                    // Configure and run this specific build
-                    await this.configureBuild();
-
-                    if (this.options.watch) {
-                        await this.watch();
-                    } else {
-                        await this.build();
-                    }
-
-                    console.log(`Command ${commandName} completed.`);
+                    await this.processCommand(commandName, initialOptions);
                 } else {
                     console.warn(`Unknown command: ${commandName}, skipping`);
                 }
             }
-
-            return;
         } else {
-            // No commands found, use traditional option resolution
-            this.options = this.resolveOptionsTraditionally(initialOptions);
-
-            // Configure and build
-            await this.configureBuild();
-
-            if (this.options.watch) {
-                return this.watch();
-            } else {
-                return this.build();
-            }
+            // No commands found, use traditional processing
+            await this.processWithoutCommands(initialOptions);
         }
     }
 

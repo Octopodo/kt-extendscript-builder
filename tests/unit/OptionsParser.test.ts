@@ -45,7 +45,7 @@ describe('OptionsParser', () => {
             expect(options.watch).toBe(true);
             expect(options.mode).toBe('development');
             expect(options.ponyfills).toEqual(['pony1.js', 'pony2.js']);
-            expect(options.clean).toBe(false);
+            expect(options.clean).toEqual(['false']);
             expect(options['config-file']).toBe('custom.config.json');
             expect(options.priority).toBe('config');
             expect(options.preset).toBe('custom');

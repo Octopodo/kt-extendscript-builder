@@ -29,6 +29,24 @@ export const presets: Record<string, Partial<BuildOptions>> = {
         test: true,
         mode: 'development',
         watch: false
+    },
+    minify: {
+        input: 'src/index.ts',
+        output: 'dist/index.js',
+        minify: true,
+        test: false,
+        mode: 'production'
+    },
+    uglify: {
+        input: 'src/index.ts',
+        output: 'dist/index.js',
+        uglify: true,
+        test: false,
+        mode: 'production'
+    },
+    'clean-only': {
+        clean: ['before'],
+        'clean-only': true
     }
 };
 

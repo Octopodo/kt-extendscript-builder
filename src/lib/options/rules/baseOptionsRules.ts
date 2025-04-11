@@ -47,4 +47,18 @@ const tsconfigRule: DependencyRule = (options: Partial<BuildOptions>): Partial<B
     };
 };
 
+const cleanRule: DependencyRule = (options: Partial<BuildOptions>): Partial<BuildOptions> => {
+    const cleanedOptions: Partial<BuildOptions> = {};
+    if (!options.clean) {
+        cleanedOptions.clean = ['false'];
+    }
+    if (!Array.isArray(cleanedOptions.clean) && typeof cleanedOptions.clean === 'string') {
+        cleanedOptions.clean = [cleanedOptions.clean];
+    }
+    return {
+        ...options,
+        ...cleanedOptions
+    };
+};
+
 export const baseOptionsRules = { modeRule, testRule, tsconfigRule };

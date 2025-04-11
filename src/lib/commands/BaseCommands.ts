@@ -113,6 +113,15 @@ export class AdobeAppCommand extends BaseCommand {
     }
 }
 
+export class CleanCommand extends BaseCommand {
+    constructor() {
+        super('clean-only', 'Clean the build directory', {
+            clean: ['before'],
+            'clean-only': true
+        });
+    }
+}
+
 // Export specific command classes that may need direct instantiation
 export const CommandClasses = {
     DefaultCommand,
@@ -120,8 +129,17 @@ export const CommandClasses = {
     DevCommand,
     TestCommand,
     MinifyCommand,
-    UglifyCommand
+    UglifyCommand,
+    CleanCommand
 };
 
 // Export base commands for backwards compatibility
-export const baseCommands = [DefaultCommand, BuildCommand, DevCommand, TestCommand, MinifyCommand, UglifyCommand];
+export const baseCommands = [
+    DefaultCommand,
+    BuildCommand,
+    DevCommand,
+    TestCommand,
+    MinifyCommand,
+    UglifyCommand,
+    CleanCommand
+];

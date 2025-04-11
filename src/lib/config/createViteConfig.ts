@@ -25,7 +25,9 @@ export function createViteConfig(options: Partial<BuildOptions> = {}): ExtendedV
                     sourcemap: false
                 }
             }
-        }
+        },
+        // Inicializar la propiedad extendScriptConfig con un objeto vacío
+        extendScriptConfig: {}
     };
 
     return config;

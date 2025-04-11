@@ -83,9 +83,15 @@ export const postprocessorOptions = [
     {
         name: 'clean',
         alias: 'c',
+        type: 'array',
+        description: 'Clean output directory before build',
+        choices: ['after', 'before', 'both', 'false']
+    },
+    {
+        name: 'clean-only',
+        alias: 'co',
         type: 'boolean',
-        description: 'Clean output directory before build'
-        // default: true
+        description: 'Clean output directory only'
     },
     {
         name: 'uglify',

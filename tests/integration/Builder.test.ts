@@ -117,4 +117,19 @@ describe('Builder', () => {
         const buildFile = loadFile('tests/fixtures/basic-project/dist/index.js');
         const testFile = loadFile('dist.test/index.test.js');
     });
+
+    it('should clean only the output directory', async () => {
+        process.argv = ['node', 'script.js', ...defaultPaths];
+        const builder = new Builder();
+        await builder.run();
+        const checkFile = loadFile('tests/fixtures/outputs/index.js');
+        const buildFile = loadFile('tests/fixtures/basic-project/dist/index.js');
+        expect(buildFile).toBe(checkFile);
+
+        process.argv = ['node', 'script.js', 'clean-only'];
+        const builder2 = new Builder();
+        await builder2.run();
+        const cleanFile = loadFile('tests/fixtures/basic-project/dist/index.js');
+        expect(fs.existsSync(cleanFile)).toBe(false);
+    });
 });

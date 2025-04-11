@@ -3,6 +3,7 @@ import { BaseCommand } from './BaseCommands';
 import { presets } from '../options/optionsPresets';
 import { ConfigLoader } from '../config/ConfigLoader';
 import { CommandRegistry } from './CommandRegistry';
+import { baseCommands } from './BaseCommands';
 import path from 'path';
 
 /**
