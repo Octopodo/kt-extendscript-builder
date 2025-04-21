@@ -1,67 +1,84 @@
 import { BuildOptions, defaultBuildOptions } from '../../types';
 import { OptionsRuleResolver } from './OptionsRuleResolver';
-import { OptionsPresetsResolver } from './OptionsPresetsResolver';
 import { ConfigLoader } from '../config/ConfigLoader';
+import { OptionsParser } from './OptionsParser';
+
 /**
- * Manages the resolution of build options by merging defaults, presets, config files, and CLI arguments.
+ * Centraliza la gestión y resolución de opciones combinando todas las fuentes posibles.
  *
- * The OptionsResolver determines the final build configuration based on:
- * - Default build options
- * - Named presets (if specified)
- * - Configuration file arguments
- * - Command-line arguments
- *
- * The priority of these sources can be controlled with the 'priority' flag. This flag only applies to the CLI arguments.
+ * OptionsResolver determina la configuración final basada en:
+ * - Opciones por defecto
+ * - Presets (si se especifican)
+ * - Opciones de archivo de configuración
+ * - Opciones de línea de comandos
+ * - Opciones de comandos específicos
  */
 export class OptionsResolver {
-    /**
-     * Collection of predefined option configurations that can be referenced by name
-     * @private
-     */
-    private presets: Record<string, Partial<BuildOptions>> = {};
+    private rulesResolver: OptionsRuleResolver;
+    private configLoader: ConfigLoader;
 
-    /**
-     * Resolves the final build options by merging various sources
-     *
-     * @param cliArgs - Command line arguments provided when running the build
-     * @param configFileArgs - Arguments loaded from a configuration file
-     * @returns Merged build options with all rules applied
-     */
-    resolve(cliArgs: Record<string, any>): Partial<BuildOptions> {
-        const presetResolver = new OptionsPresetsResolver();
-        presetResolver.getUserPresets(cliArgs['config-file']);
-        const defaultPreset = presetResolver.resolvePreset('default');
-        const userPreset = presetResolver.resolvePreset(cliArgs.preset || 'default');
-        let options = { ...defaultBuildOptions, ...defaultPreset };
-
-        // let testMode;
-        // if (cliArgs.test) {
-        //     testMode = true;
-        // }
-
-        const priority = cliArgs.priority.toLowerCase() || 'cli';
-
-        if (priority === 'cli') {
-            options = { ...defaultPreset, ...options, ...userPreset, ...cliArgs };
-        } else {
-            options = { ...defaultPreset, ...options, ...cliArgs, ...userPreset };
-        }
-
-        // options.test = testMode;
-
-        options = this.resolveRules(options);
-        return options;
+    constructor() {
+        this.rulesResolver = new OptionsRuleResolver();
+        this.configLoader = new ConfigLoader();
     }
 
     /**
-     * Applies additional transformation rules to the resolved options
+     * Resuelve y combina todas las opciones de todas las fuentes posibles
      *
-     * @param options - Partially resolved build options
-     * @returns Build options after applying all transformation rules
+     * @param cliOptions - Opciones pasadas por línea de comandos (opcional)
+     * @returns Opciones finales combinadas con todas las reglas aplicadas
      */
-    resolveRules(options: Partial<BuildOptions>): Partial<BuildOptions> {
-        const resolver = new OptionsRuleResolver();
-        const preset = resolver.resolve({ ...options });
-        return preset;
+    resolve(command?: string): Partial<BuildOptions> {
+        // Si no se proporcionan opciones CLI, obtenerlas del parser
+        const options = OptionsParser.parse();
+
+        // 1. Cargar configuraciones del archivo de configuración
+        const configPath = options['config-file'] as string;
+
+        this.configLoader.load(configPath);
+
+        // 2. Inicializar procesador de comandos
+
+        // 3. Cargar configuración de presets
+
+        // 4. Extraer comandos de los argumentos
+
+        // 5. Procesar opciones de comandos (si existen)
+        let commandOptions = {};
+
+        // 6. Determinar qué preset usar
+        const presetName = options.preset || 'default';
+
+        // 7. Resolver presets
+        const userPreset = this.configLoader.getConfig(command) || {};
+        const defaultPreset = this.configLoader.getConfig('default') || {};
+
+        // 8. Empezar con las opciones base
+        let mergedOptions = { ...defaultBuildOptions, ...defaultPreset };
+
+        // 9. Determinar prioridad para la combinación
+        const priority = ((options.priority || 'cli') as string).toLowerCase();
+
+        // 10. Combinar todas las opciones según la prioridad
+        if (priority === 'cli') {
+            // CLI tiene prioridad más alta
+            mergedOptions = {
+                ...mergedOptions,
+                ...userPreset,
+                ...commandOptions,
+                ...options
+            };
+        } else {
+            // El preset o comandos tienen prioridad más alta
+            mergedOptions = {
+                ...mergedOptions,
+                ...options,
+                ...commandOptions,
+                ...userPreset
+            };
+        }
+
+        // 11. Aplicar reglas de transformación
+        return this.rulesResolver.resolve(mergedOptions);
     }
 }

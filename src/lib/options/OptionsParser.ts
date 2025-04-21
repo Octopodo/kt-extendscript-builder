@@ -38,6 +38,27 @@ export class OptionsParser {
         return argv.help().parse() as Partial<BuildOptions>;
     }
 
+    /**
+     * Extrae los comandos (argumentos posicionales que no empiezan con - o --) de process.argv
+     *
+     * @returns Un array con los nombres de comandos encontrados
+     */
+    static extractCommands(): string[] {
+        const userArgs = hideBin(process.argv);
+        const commands: string[] = [];
+
+        // Considerar argumentos que no empiezan con '-' o '--' como posibles comandos
+        for (const arg of userArgs) {
+            if (!arg.startsWith('-') && !arg.startsWith('--')) {
+                commands.push(arg);
+            } else {
+                break;
+            }
+        }
+
+        return commands;
+    }
+
     static filter(options: Record<string, any>): Partial<BuildOptions> {
         const validOptions = KTBuilderOptions.map((option) => option.name);
         const filteredOptions: Partial<BuildOptions> = {};

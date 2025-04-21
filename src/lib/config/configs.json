@@ -1,4 +1,10 @@
 {
+    "default": {
+        "input": "src/index.ts",
+        "output": "dist/index.js",
+        "test": false,
+        "mode": "production"
+    },
     "build": {
         "input": "src/index.ts",
         "output": "dist/index.js",
@@ -18,10 +24,24 @@
     },
     "bolt": {
         "input": "src/jsx/index.ts",
-        "oputput": "./jsx/index.js"
+        "output": "./jsx/index.js"
+    },
+    "minify": {
+        "input": "src/index.ts",
+        "output": "dist/index.js",
+        "minify": true,
+        "test": false,
+        "mode": "production"
+    },
+    "uglify": {
+        "input": "src/index.ts",
+        "output": "dist/index.js",
+        "uglify": true,
+        "test": false,
+        "mode": "production"
     },
     "clean-only": {
-        "clean": true,
+        "clean": ["before"],
         "clean-only": true
     }
 }

@@ -11,7 +11,7 @@ const rimrafAsync = promisify(rimraf);
  */
 export class Cleaner {
     // Carpetas críticas que no deben ser eliminadas
-    private static readonly PROTECTED_FOLDERS = ['src', 'node_modules', 'tests'];
+    private static readonly PROTECTED_FOLDERS = ['src', 'node_modules'];
 
     /**
      * Limpia el directorio de salida de manera segura

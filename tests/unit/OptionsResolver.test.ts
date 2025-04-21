@@ -9,8 +9,7 @@ describe('OptionsResolver', () => {
 
         process.argv = ['node', 'script.js'];
 
-        const options = OptionsParser.parse();
-        const resolvedOptions = resolver.resolve(options);
+        const resolvedOptions = resolver.resolve();
         expect(resolvedOptions).toMatchObject(defaultBuildOptions);
     });
 
@@ -19,8 +18,7 @@ describe('OptionsResolver', () => {
 
         process.argv = ['node', 'script.js', '--preset', 'test'];
 
-        const options = OptionsParser.parse();
-        const resolvedOptions = resolver.resolve(options);
+        const resolvedOptions = resolver.resolve();
 
         expect(resolvedOptions.test).toBe(true);
         // expect(resolvedOptions.input).toContain('test');
@@ -32,12 +30,11 @@ describe('OptionsResolver', () => {
 
         process.argv = ['node', 'script.js', '--input', 'cli-input.ts', '--priority', 'cli'];
 
-        const options = OptionsParser.parse();
         const configFileArgs = {
             input: 'config-input.ts'
         };
 
-        const resolvedOptions = resolver.resolve(options);
+        const resolvedOptions = resolver.resolve();
 
         expect(resolvedOptions.input).toBe('cli-input.ts');
     });
@@ -57,13 +54,11 @@ describe('OptionsResolver', () => {
             '--preset',
             'my-custom-preset'
         ];
-
-        const options = OptionsParser.parse();
         const configFileArgs = {
             input: 'config-input.ts'
         };
 
-        const resolvedOptions = resolver.resolve(options);
+        const resolvedOptions = resolver.resolve();
 
         expect(resolvedOptions.input).toBe('src/my-custom-preset/index.ts');
     });
@@ -72,11 +67,7 @@ describe('OptionsResolver', () => {
         const resolver = new OptionsResolver();
 
         process.argv = ['node', 'script.js', '--test'];
-
-        const options = OptionsParser.parse();
-        const configFileArgs = { test: false };
-
-        const resolvedOptions = resolver.resolve(options);
+        const resolvedOptions = resolver.resolve();
 
         expect(resolvedOptions.test).toBe(true);
     });
@@ -86,8 +77,7 @@ describe('OptionsResolver', () => {
 
         process.argv = ['node', 'script.js', '--mode', 'production'];
 
-        const options = OptionsParser.parse();
-        const resolvedOptions = resolver.resolve(options);
+        const resolvedOptions = resolver.resolve();
 
         // modeRule should set watch to false for production mode
         expect(resolvedOptions.watch).toBe(false);
@@ -100,8 +90,7 @@ describe('OptionsResolver', () => {
 
         process.argv = ['node', 'script.js', '--preset', 'non-existent-preset'];
 
-        const options = OptionsParser.parse();
-        const resolvedOptions = resolver.resolve(options);
+        const resolvedOptions = resolver.resolve();
 
         // Should use default preset values
         expect(resolvedOptions.input).toBe('src/index.ts');
