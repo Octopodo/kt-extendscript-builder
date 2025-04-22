@@ -13,18 +13,6 @@ describe('OptionsResolver', () => {
         expect(resolvedOptions).toMatchObject(defaultBuildOptions);
     });
 
-    it('should apply preset options when preset is specified', () => {
-        const resolver = new OptionsResolver();
-
-        process.argv = ['node', 'script.js', '--preset', 'test'];
-
-        const resolvedOptions = resolver.resolve();
-
-        expect(resolvedOptions.test).toBe(true);
-        // expect(resolvedOptions.input).toContain('test');
-        expect(resolvedOptions.output).toContain('test');
-    });
-
     it('should prioritize CLI arguments over config file arguments when priority is cli', () => {
         const resolver = new OptionsResolver();
 
@@ -41,24 +29,23 @@ describe('OptionsResolver', () => {
 
     it('should prioritize config file arguments over CLI arguments when priority is config', () => {
         const resolver = new OptionsResolver();
-
+        const command = 'my-custom-preset';
         process.argv = [
             'node',
             'script.js',
+            command,
             '--input',
             'cli-input.ts',
             '--priority',
             'config',
             '--config-file',
-            'tests/fixtures/basic-project/kt.config.json',
-            '--preset',
-            'my-custom-preset'
+            'tests/fixtures/basic-project/kt.config.json'
         ];
         const configFileArgs = {
             input: 'config-input.ts'
         };
 
-        const resolvedOptions = resolver.resolve();
+        const resolvedOptions = resolver.resolve(command);
 
         expect(resolvedOptions.input).toBe('src/my-custom-preset/index.ts');
     });

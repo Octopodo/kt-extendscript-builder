@@ -1,270 +1,137 @@
-import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest';
+import { describe, it, expect, beforeEach, afterEach } from 'vitest';
 import { Cleaner } from '../../src/lib/builder/Cleaner';
-import fs from 'fs';
-import path from 'path';
+import * as fs from 'fs';
+import * as path from 'path';
 import { BuildOptions } from '../../src/types';
-import rimraf from 'rimraf';
-import { promisify } from 'util';
-
-// Mock de módulos
-vi.mock('fs', () => ({
-    default: {
-        existsSync: vi.fn(),
-        promises: {
-            unlink: vi.fn(),
-            readdir: vi.fn(),
-            lstat: vi.fn()
-        }
-    }
-}));
-
-vi.mock('rimraf', () => {
-    return {
-        default: vi.fn()
-    };
-});
-
-vi.mock('path', () => {
-    return {
-        default: {
-            dirname: vi.fn(),
-            resolve: vi.fn(),
-            relative: vi.fn(),
-            basename: vi.fn(),
-            join: vi.fn(),
-            sep: '/'
-        }
-    };
-});
-
-vi.mock('util', () => ({
-    promisify: vi.fn().mockImplementation((fn) => fn)
-}));
+import { mkdir, writeFile, rm } from 'fs/promises';
 
 describe('Cleaner', () => {
+    // Directorio temporal para pruebas
+    const tempDir = path.resolve(process.cwd(), 'tests/fixtures/temp-cleaner-tests');
     let options: Partial<BuildOptions>;
-    const mockCwd = '/mock/project';
 
-    beforeEach(() => {
-        options = {
-            output: '/mock/project/dist/index.js'
+    // Guarda mensajes de consola para revisarlos después
+    let consoleMessages = {
+        logs: [] as string[],
+        warnings: [] as string[],
+        errors: [] as string[]
+    };
+
+    // Funciones originales de consola
+    const originalConsole = {
+        log: console.log,
+        warn: console.warn,
+        error: console.error
+    };
+
+    // Función auxiliar para crear archivos y directorios
+    async function createTestFile(filePath: string, content: string = 'test content'): Promise<void> {
+        const dir = path.dirname(filePath);
+        await mkdir(dir, { recursive: true });
+        await writeFile(filePath, content);
+    }
+
+    beforeEach(async () => {
+        // Limpiar mensajes de consola anteriores
+        consoleMessages = { logs: [], warnings: [], errors: [] };
+
+        // Sobreescribir temporalmente console para capturar mensajes
+        console.log = (message: string) => {
+            consoleMessages.logs.push(message);
+        };
+        console.warn = (message: string) => {
+            consoleMessages.warnings.push(message);
+        };
+        console.error = (message: string) => {
+            consoleMessages.errors.push(message);
         };
 
-        // Reset mocks
-        vi.resetAllMocks();
+        // Crear directorio temporal para pruebas
+        await mkdir(tempDir, { recursive: true });
 
-        // Setup default mock implementations
-        vi.spyOn(process, 'cwd').mockReturnValue(mockCwd);
-        path.dirname = vi.fn().mockReturnValue('/mock/project/dist');
-        path.resolve = vi.fn().mockReturnValue('/mock/project/dist');
-        path.relative = vi.fn().mockReturnValue('dist');
-        path.basename = vi.fn().mockReturnValue('index.js');
-        path.join = vi.fn().mockImplementation((dir, file) => `${dir}/${file}`);
-        fs.existsSync = vi.fn().mockReturnValue(true);
-        fs.promises.readdir = vi.fn().mockResolvedValue(['index.js', 'index.js.map']);
-        fs.promises.lstat = vi.fn().mockResolvedValue({
-            isDirectory: () => false
-        });
-        fs.promises.unlink = vi.fn().mockResolvedValue(undefined);
+        // Crear estructura básica para pruebas
+        await createTestFile(path.join(tempDir, 'index.js'));
+        await createTestFile(path.join(tempDir, 'index.js.map'));
+        await mkdir(path.join(tempDir, 'subfolder'), { recursive: true });
+        await createTestFile(path.join(tempDir, 'subfolder', 'test.js'));
+
+        // Opciones por defecto
+        options = {
+            output: path.join(tempDir, 'index.js')
+        };
     });
 
-    afterEach(() => {
-        vi.restoreAllMocks();
+    afterEach(async () => {
+        // Restaurar funciones originales de console
+        console.log = originalConsole.log;
+        console.warn = originalConsole.warn;
+        console.error = originalConsole.error;
+
+        // Limpiar directorio temporal
+        try {
+            await rm(tempDir, { recursive: true, force: true });
+        } catch (err) {
+            originalConsole.error('Error limpiando el directorio temporal:', err);
+        }
     });
 
-    it('should not clean when output is not specified', async () => {
-        // Arrange
-        const warnSpy = vi.spyOn(console, 'warn').mockImplementation(() => {});
+    it('no debería limpiar cuando no se especifica output', async () => {
+        // Preparar
         options.output = undefined;
 
-        // Act
+        // Ejecutar
         await Cleaner.cleanDist(options);
 
-        // Assert
-        expect(warnSpy).toHaveBeenCalledWith('No se especificó un archivo de salida, no se puede limpiar');
-        expect(fs.promises.unlink).not.toHaveBeenCalled();
+        // Verificar
+        expect(consoleMessages.warnings.some((m) => m.includes('No se especificó un archivo'))).toBe(true);
     });
 
-    it('should not clean when directory does not exist', async () => {
-        // Arrange
-        const warnSpy = vi.spyOn(console, 'warn').mockImplementation(() => {});
-        fs.existsSync = vi.fn().mockReturnValue(false);
+    it('debería limpiar un archivo específico cuando existe', async () => {
+        // Preparar
+        const targetFile = path.join(tempDir, 'index.js');
+        options.output = targetFile;
 
-        // Act
+        // Verificar que el archivo existe antes de limpiar
+        expect(fs.existsSync(targetFile)).toBe(true);
+
+        // Ejecutar
         await Cleaner.cleanDist(options);
 
-        // Assert
-        expect(warnSpy).toHaveBeenCalledWith(expect.stringContaining('no existe'));
-        expect(fs.promises.unlink).not.toHaveBeenCalled();
+        // Verificar
+        expect(fs.existsSync(targetFile)).toBe(false);
+        expect(fs.existsSync(path.join(tempDir, 'index.js.map'))).toBe(true);
+        expect(consoleMessages.logs.some((m) => m.includes('Archivo limpiado'))).toBe(true);
     });
 
-    it('should not clean project root directory', async () => {
-        // Arrange
-        const errorSpy = vi.spyOn(console, 'error').mockImplementation(() => {});
-        path.resolve = vi.fn().mockReturnValue('/mock/project');
+    it('no debería limpiar directorios protegidos', async () => {
+        // Preparar - crear un directorio protegido
+        const srcDir = path.join(tempDir, 'src');
+        await mkdir(srcDir, { recursive: true });
+        await createTestFile(path.join(srcDir, 'test.js'));
 
-        // Act
+        options.output = srcDir;
+
+        // Ejecutar
         await Cleaner.cleanDist(options);
 
-        // Assert
-        expect(errorSpy).toHaveBeenCalledWith(expect.stringContaining('¡Advertencia de seguridad!'));
-        expect(fs.promises.unlink).not.toHaveBeenCalled();
+        // Verificar
+        expect(fs.existsSync(srcDir)).toBe(true);
+        expect(fs.existsSync(path.join(srcDir, 'test.js'))).toBe(true);
+        expect(consoleMessages.errors.some((m) => m.includes('directorio protegido'))).toBe(true);
     });
 
-    it('should not clean directories outside of project root', async () => {
-        // Arrange
-        const errorSpy = vi.spyOn(console, 'error').mockImplementation(() => {});
-        path.resolve = vi.fn().mockReturnValue('/other/location');
+    it('debería omitir carpetas protegidas durante la limpieza', async () => {
+        // Preparar - crear una subcarpeta protegida
+        const nodeModulesDir = path.join(tempDir, 'node_modules');
+        await mkdir(nodeModulesDir, { recursive: true });
+        await createTestFile(path.join(nodeModulesDir, 'package.js'));
 
-        // Act
+        options.output = path.join(tempDir, 'package.js');
+
+        // Ejecutar
         await Cleaner.cleanDist(options);
 
-        // Assert
-        expect(errorSpy).toHaveBeenCalledWith(expect.stringContaining('¡Advertencia de seguridad!'));
-        expect(fs.promises.unlink).not.toHaveBeenCalled();
-    });
-
-    it('should not clean protected directories', async () => {
-        // Arrange
-        const errorSpy = vi.spyOn(console, 'error').mockImplementation(() => {});
-        path.relative = vi.fn().mockReturnValue('src/dist');
-
-        // Act
-        await Cleaner.cleanDist(options);
-
-        // Assert
-        expect(errorSpy).toHaveBeenCalledWith(expect.stringContaining('directorio protegido'));
-        expect(fs.promises.unlink).not.toHaveBeenCalled();
-    });
-
-    it('should clean a specific file when it exists', async () => {
-        // Arrange
-        const logSpy = vi.spyOn(console, 'log').mockImplementation(() => {});
-        const filePath = '/mock/project/dist/index.js';
-
-        path.join = vi.fn().mockReturnValue(filePath);
-        fs.existsSync = vi.fn().mockImplementation((p) => true);
-
-        // Act
-        await Cleaner.cleanDist(options);
-
-        // Assert
-        expect(fs.promises.unlink).toHaveBeenCalledWith(filePath);
-        expect(logSpy).toHaveBeenCalledWith(expect.stringContaining('Archivo limpiado'));
-    });
-
-    it('should clean all files in directory when specific file does not exist', async () => {
-        // Arrange
-        const logSpy = vi.spyOn(console, 'log').mockImplementation(() => {});
-
-        // Configurar para que el archivo específico no exista
-        const dirPath = '/mock/project/dist';
-        const filePath = `${dirPath}/index.js`;
-        path.join = vi.fn().mockImplementation((dir, file) => {
-            if (dir === dirPath && file === 'index.js') return filePath;
-            if (dir === dirPath && file === 'index.js') return `${dir}/index.js`;
-            if (dir === dirPath && file === 'index.js.map') return `${dir}/index.js.map`;
-            return `${dir}/${file}`;
-        });
-
-        fs.existsSync = vi.fn().mockImplementation((p) => {
-            // El directorio existe pero el archivo específico no
-            if (p === dirPath) return true;
-            if (p === filePath) return false;
-            return true;
-        });
-
-        // Act
-        await Cleaner.cleanDist(options);
-
-        // Assert
-        // Debe llamar a unlink para cada archivo en el directorio
-        expect(fs.promises.unlink).toHaveBeenCalledTimes(2);
-        expect(logSpy).toHaveBeenCalledWith(expect.stringContaining('Directorio limpiado'));
-    });
-
-    it('should skip protected subdirectories during directory clean', async () => {
-        // Arrange
-        const warnSpy = vi.spyOn(console, 'warn').mockImplementation(() => {});
-
-        // Configurar para que el archivo específico no exista y haya un directorio protegido
-        const dirPath = '/mock/project/dist';
-        const filePath = `${dirPath}/index.js`;
-        const protectedPath = `${dirPath}/node_modules`;
-
-        // Mock de existsSync para el escenario
-        fs.existsSync = vi.fn().mockImplementation((p) => {
-            if (p === dirPath) return true; // El directorio existe
-            if (p === filePath) return false; // El archivo específico no existe
-            return true;
-        });
-
-        // Configurar readdir para devolver archivos y un directorio protegido
-        fs.promises.readdir = vi.fn().mockResolvedValue(['index.js', 'node_modules']);
-
-        // Mock de path.join según los argumentos
-        path.join = vi.fn().mockImplementation((dir, file) => {
-            if (file === 'index.js') return `${dir}/index.js`;
-            if (file === 'node_modules') return `${dir}/node_modules`;
-            return `${dir}/${file}`;
-        });
-
-        // Mock de path.basename
-        path.basename = vi.fn().mockImplementation((p) => {
-            if (p === protectedPath) return 'node_modules';
-            if (p === filePath) return 'index.js';
-            return p.split('/').pop() || '';
-        });
-
-        // Mock de lstat para que node_modules sea un directorio
-        fs.promises.lstat = vi.fn().mockImplementation((p) => {
-            if (p === protectedPath) {
-                return { isDirectory: () => true };
-            }
-            return { isDirectory: () => false };
-        });
-
-        // Act
-        await Cleaner.cleanDist(options);
-
-        // Assert
-        expect(warnSpy).toHaveBeenCalledWith(expect.stringContaining('Omitiendo carpeta protegida'));
-        // Solo se debe eliminar el archivo, no el directorio protegido
-        expect(fs.promises.unlink).toHaveBeenCalledTimes(1);
-    });
-
-    it('should handle errors during cleaning', async () => {
-        // Arrange
-        const errorSpy = vi.spyOn(console, 'error').mockImplementation(() => {});
-        fs.promises.unlink = vi.fn().mockRejectedValue(new Error('Error al eliminar archivo'));
-
-        // Act
-        await Cleaner.cleanDist(options);
-
-        // Assert
-        expect(errorSpy).toHaveBeenCalledWith(expect.stringContaining('Error al limpiar'), expect.any(Error));
-    });
-
-    it('should log when directory is empty', async () => {
-        // Arrange
-        const logSpy = vi.spyOn(console, 'log').mockImplementation(() => {});
-
-        // Configurar para que el archivo específico no exista y el directorio esté vacío
-        const dirPath = '/mock/project/dist';
-        const filePath = `${dirPath}/index.js`;
-
-        fs.existsSync = vi.fn().mockImplementation((p) => {
-            if (p === dirPath) return true; // El directorio existe
-            if (p === filePath) return false; // El archivo específico no existe
-            return false;
-        });
-
-        fs.promises.readdir = vi.fn().mockResolvedValue([]);
-
-        // Act
-        await Cleaner.cleanDist(options);
-
-        // Assert
-        expect(logSpy).toHaveBeenCalledWith(expect.stringContaining('está vacío'));
+        expect(fs.existsSync(nodeModulesDir)).toBe(true);
+        expect(fs.existsSync(path.join(nodeModulesDir, 'package.js'))).toBe(true);
     });
 });

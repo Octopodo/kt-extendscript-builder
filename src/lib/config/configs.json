@@ -40,7 +40,9 @@
         "test": false,
         "mode": "production"
     },
-    "clean-only": {
+    "clean": {
+        "input": "src/index.ts",
+        "output": "dist/index.js",
         "clean": ["before"],
         "clean-only": true
     }

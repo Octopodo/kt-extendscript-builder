@@ -94,10 +94,9 @@ describe('Builder', () => {
         process.argv = [
             'node',
             'script.js',
+            'my-ae-preset',
             '--config-path',
-            'tests/fixtures/basic-project/kt.config.json',
-            '--preset',
-            'my-ae-preset'
+            'tests/fixtures/basic-project/kt.config.json'
         ];
         const builder = new Builder();
         await builder.run();
@@ -129,7 +128,7 @@ describe('Builder', () => {
         const buildFile = loadFile('tests/fixtures/basic-project/dist/index.js');
         expect(buildFile).toBe(checkFile);
 
-        process.argv = ['node', 'script.js', 'clean-outdir', '--output', 'tests/fixtures/basic-project/dist'];
+        process.argv = ['node', 'script.js', 'clean', '--output', 'tests/fixtures/basic-project/dist'];
         const builder2 = new Builder();
         await builder2.run();
         const cleanFile = loadFile('tests/fixtures/basic-project/dist/index.js');
