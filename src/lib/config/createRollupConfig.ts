@@ -34,8 +34,7 @@ export function createRollupConfig(options: Partial<BuildOptions> = {}) {
         input: input,
         treeshake: true,
         output: {
-            file: output,
-            footer: `thisObj.KT = KT;`
+            file: output
         },
 
         external: [],
