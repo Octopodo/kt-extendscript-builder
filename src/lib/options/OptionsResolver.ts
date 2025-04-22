@@ -4,14 +4,14 @@ import { ConfigLoader } from '../config/ConfigLoader';
 import { OptionsParser } from './OptionsParser';
 
 /**
- * Centraliza la gestión y resolución de opciones combinando todas las fuentes posibles.
+ * Centralizes the management and resolution of options by combining all possible sources.
  *
- * OptionsResolver determina la configuración final basada en:
- * - Opciones por defecto
- * - Presets (si se especifican)
- * - Opciones de archivo de configuración
- * - Opciones de línea de comandos
- * - Opciones de comandos específicos
+ * OptionsResolver determines the final configuration based on:
+ * - Default options
+ * - Presets (if specified)
+ * - Configuration file options
+ * - Command line options
+ * - Specific command options
  */
 export class OptionsResolver {
     private rulesResolver: OptionsRuleResolver;
@@ -23,45 +23,45 @@ export class OptionsResolver {
     }
 
     /**
-     * Resuelve y combina todas las opciones de todas las fuentes posibles
+     * Resolves and combines all options from all possible sources
      *
-     * @param cliOptions - Opciones pasadas por línea de comandos (opcional)
-     * @returns Opciones finales combinadas con todas las reglas aplicadas
+     * @param cliOptions - Options passed via command line (optional)
+     * @returns Final combined options with all rules applied
      */
     resolve(command?: string): Partial<BuildOptions> {
-        // Si no se proporcionan opciones CLI, obtenerlas del parser
+        // If CLI options are not provided, get them from the parser
         const options = OptionsParser.parse();
 
-        // 1. Cargar configuraciones del archivo de configuración
+        // 1. Load configurations from the configuration file
         const configPath = options['config-file'] as string;
 
         this.configLoader.load(configPath);
 
-        // 2. Inicializar procesador de comandos
+        // 2. Initialize command processor
 
-        // 3. Cargar configuración de presets
+        // 3. Load preset configuration
 
-        // 4. Extraer comandos de los argumentos
+        // 4. Extract commands from arguments
 
-        // 5. Procesar opciones de comandos (si existen)
+        // 5. Process command options (if they exist)
         let commandOptions = {};
 
-        // 6. Determinar qué preset usar
+        // 6. Determine which preset to use
         const presetName = options.preset || 'default';
 
-        // 7. Resolver presets
+        // 7. Resolve presets
         const userPreset = this.configLoader.getConfig(command) || {};
         const defaultPreset = this.configLoader.getConfig('default') || {};
 
-        // 8. Empezar con las opciones base
+        // 8. Start with base options
         let mergedOptions = { ...defaultBuildOptions, ...defaultPreset };
 
-        // 9. Determinar prioridad para la combinación
+        // 9. Determine priority for combination
         const priority = ((options.priority || 'cli') as string).toLowerCase();
 
-        // 10. Combinar todas las opciones según la prioridad
+        // 10. Combine all options according to priority
         if (priority === 'cli') {
-            // CLI tiene prioridad más alta
+            // CLI has highest priority
             mergedOptions = {
                 ...mergedOptions,
                 ...userPreset,
@@ -69,7 +69,7 @@ export class OptionsResolver {
                 ...options
             };
         } else {
-            // El preset o comandos tienen prioridad más alta
+            // Preset or commands have highest priority
             mergedOptions = {
                 ...mergedOptions,
                 ...options,
@@ -78,7 +78,7 @@ export class OptionsResolver {
             };
         }
 
-        // 11. Aplicar reglas de transformación
+        // 11. Apply transformation rules
         return this.rulesResolver.resolve(mergedOptions);
     }
 }

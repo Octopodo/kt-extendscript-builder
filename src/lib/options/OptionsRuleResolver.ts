@@ -26,7 +26,7 @@ export class OptionsRuleResolver {
      */
     addRules(rule: DependencyRule | DependencyRule[] | Record<string, DependencyRule>): void {
         if (Array.isArray(rule)) {
-            // Caso 1: Si rule es un array de DependencyRule
+            // Case 1: If rule is an array of DependencyRule
             this.rules.push(...rule);
         } else if (typeof rule === 'function') {
             this.rules.push(rule);

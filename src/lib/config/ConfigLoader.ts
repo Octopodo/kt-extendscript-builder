@@ -16,7 +16,7 @@ export class ConfigLoader {
         const absolutePath = path.resolve(process.cwd(), configPath);
         let config: Record<string, any> = {};
         if (!fs.existsSync(absolutePath)) {
-            console.warn(`${absolutePath} config file does not exist. Skiping...`);
+            console.warn(`${absolutePath} config file does not exist. Skipping...`);
             return {};
         }
 
@@ -39,7 +39,7 @@ export class ConfigLoader {
     getConfig(name: string = 'default'): Partial<BuildOptions> {
         const config = this._configurations[name];
         if (!config) {
-            console.warn(`No se encontró la configuración "${name}" en el archivo de configuración.`);
+            console.warn(`Configuration "${name}" was not found in the configuration file.`);
             return {};
         }
         return config;

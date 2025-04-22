@@ -1,8 +1,8 @@
 // src/loaders/TsconfigLoader.ts
-import { BuildOptions } from '../../types'; // Ajusta la ruta según tu estructura
+import { BuildOptions } from '../../types'; // Adjust the path according to your structure
 import path from 'path';
 import fs from 'fs';
-import { tsconfigES3, tsconfigTestsES3 } from './tsconfigTemplates'; // Ajusta la ruta a tus templates
+import { tsconfigES3, tsconfigTestsES3 } from './tsconfigTemplates'; // Adjust the path to your templates
 import { option } from 'yargs';
 
 export class TsconfigLoader {
@@ -43,14 +43,14 @@ export class TsconfigLoader {
     private loadFromFile(configPath: string) {
         const absolutePath = path.resolve(process.cwd(), configPath);
         if (!fs.existsSync(absolutePath)) {
-            throw new Error(`El archivo tsconfig en ${absolutePath} no existe`);
+            throw new Error(`The tsconfig file at ${absolutePath} does not exist`);
         }
 
         const fileContent = fs.readFileSync(absolutePath, 'utf-8');
         try {
             return JSON.parse(fileContent);
         } catch (error: any) {
-            throw new Error(`Error al parsear el archivo tsconfig en ${absolutePath}: ${error.message}`);
+            throw new Error(`Error parsing the tsconfig file at ${absolutePath}: ${error.message}`);
         }
     }
 }

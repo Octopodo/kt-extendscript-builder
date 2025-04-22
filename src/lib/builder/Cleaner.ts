@@ -7,15 +7,15 @@ import { promisify } from 'util';
 const rimrafAsync = promisify(rimraf);
 
 /**
- * Clase encargada de la limpieza segura de directorios de salida
+ * Class responsible for safely cleaning output directories
  */
 export class Cleaner {
-    // Carpetas críticas que no deben ser eliminadas
+    // Critical folders that should not be deleted
     private static readonly PROTECTED_FOLDERS = ['src', 'node_modules'];
 
     /**
-     * Limpia el directorio de salida de manera segura
-     * @param options Opciones de construcción
+     * Safely cleans the output directory
+     * @param options Build options
      */
     static async cleanDist(options: Partial<BuildOptions>): Promise<void> {
         if (!this.validateOptions(options)) {
@@ -23,7 +23,7 @@ export class Cleaner {
         }
 
         if (!fs.existsSync(options.output as string)) {
-            console.warn(`El archivo de salida ${options.output} no existe. No se realizará la limpieza.`);
+            console.warn(`Output file ${options.output} does not exist. Cleaning will not be performed.`);
             return;
         }
         const stat = fs.lstatSync(options.output as string);
@@ -43,63 +43,63 @@ export class Cleaner {
         try {
             await this.performClean(distPath, options.output as string);
         } catch (error) {
-            console.error(`Error al limpiar ${distPath}:`, error);
+            console.error(`Error cleaning ${distPath}:`, error);
         }
     }
 
     /**
-     * Valida que las opciones sean correctas para realizar la limpieza
-     * @param options Opciones de construcción
-     * @returns true si las opciones son válidas, false en caso contrario
+     * Validates that the options are correct for cleaning
+     * @param options Build options
+     * @returns true if options are valid, false otherwise
      */
     private static validateOptions(options: Partial<BuildOptions>): boolean {
         if (!options.output) {
-            console.warn('No se especificó un archivo de salida, no se puede limpiar');
+            console.warn('No output file specified, cannot clean');
             return false;
         }
         return true;
     }
 
     /**
-     * Verifica que el directorio de salida exista y sea seguro para limpiar
-     * @param distPath Ruta al directorio de salida
-     * @returns true si el directorio es válido y seguro, false en caso contrario
+     * Verifies that the output directory exists and is safe to clean
+     * @param distPath Path to the output directory
+     * @returns true if the directory is valid and safe, false otherwise
      */
     private static validateDistPath(distPath: string): boolean {
-        // Verificar si el directorio existe
+        // Check if the directory exists
         if (!fs.existsSync(distPath)) {
-            console.warn(`${distPath} no existe. Saltando limpieza`);
+            console.warn(`${distPath} does not exist. Skipping cleaning`);
             return false;
         }
 
         const absolutePath = path.resolve(distPath);
         const projectRoot = process.cwd();
 
-        // Comprobar que el directorio a limpiar es un subdirectorio del proyecto
-        // y que no es el mismo directorio raíz del proyecto
+        // Check that the directory to clean is a subdirectory of the project
+        // and not the project root directory itself
         if (!absolutePath.startsWith(projectRoot) || absolutePath === projectRoot) {
             console.error(
-                `¡Advertencia de seguridad! No se limpiará ${absolutePath} ya que no es un subdirectorio seguro del proyecto`
+                `Security warning! ${absolutePath} will not be cleaned as it is not a safe project subdirectory`
             );
             return false;
         }
 
-        // Verificar que no se trata de un directorio protegido
+        // Verify it's not a protected directory
         const relativePath = path.relative(projectRoot, absolutePath);
         const pathParts = relativePath.split(path.sep);
 
         for (const part of pathParts) {
-            // Verificamos cada segmento de la ruta para comprobar que no es una carpeta protegida
-            // Excluimos rutas como "dist.test" que contienen "test" pero son válidas para limpiar
+            // We check each segment of the path to verify it's not a protected folder
+            // We exclude paths like "dist.test" that contain "test" but are valid for cleaning
             if (
                 this.PROTECTED_FOLDERS.some(
                     (folder) =>
-                        part === folder || // Es exactamente una carpeta protegida
-                        (part === 'test' && pathParts[0] !== 'dist.test') // Es 'test' pero no está dentro de 'dist.test'
+                        part === folder || // It's exactly a protected folder
+                        (part === 'test' && pathParts[0] !== 'dist.test') // It's 'test' but not inside 'dist.test'
                 )
             ) {
                 console.error(
-                    `¡Advertencia de seguridad! No se limpiará ${absolutePath} ya que es un directorio protegido del proyecto`
+                    `Security warning! ${absolutePath} will not be cleaned as it is a protected project directory`
                 );
                 return false;
             }
@@ -109,56 +109,56 @@ export class Cleaner {
     }
 
     /**
-     * Ejecuta la limpieza del directorio o archivo
-     * @param distPath Ruta al directorio de salida
-     * @param outputPath Ruta completa al archivo de salida
+     * Performs the cleaning of the directory or file
+     * @param distPath Path to the output directory
+     * @param outputPath Complete path to the output file
      */
     private static async performClean(distPath: string, outputPath: string): Promise<void> {
         const outputFilename = path.basename(outputPath);
         const outputFilePath = path.join(distPath, outputFilename);
 
-        // Si existe el archivo específico, eliminar solo ese archivo
+        // If the specific file exists, delete only that file
         if (fs.existsSync(outputFilePath)) {
             await fs.promises.unlink(outputFilePath);
-            console.log(`Archivo limpiado: ${outputFilePath}`);
+            console.log(`File cleaned: ${outputFilePath}`);
             return;
         }
 
-        // Si es un directorio, eliminar su contenido pero mantener el directorio
+        // If it's a directory, delete its contents but keep the directory
         const files = await fs.promises.readdir(distPath);
         if (files.length === 0) {
-            console.log(`Directorio ${distPath} está vacío. No hay nada que limpiar.`);
+            console.log(`Directory ${distPath} is empty. Nothing to clean.`);
             return;
         }
 
-        // Eliminación segura archivo por archivo
+        // Safe deletion file by file
         for (const file of files) {
             const filePath = path.join(distPath, file);
             await this.removeFileOrDirectory(filePath);
         }
 
-        console.log(`Directorio limpiado: ${distPath}`);
+        console.log(`Directory cleaned: ${distPath}`);
     }
 
     /**
-     * Elimina un archivo o directorio de forma segura
-     * @param filePath Ruta al archivo o directorio a eliminar
+     * Safely removes a file or directory
+     * @param filePath Path to the file or directory to remove
      */
     private static async removeFileOrDirectory(filePath: string): Promise<void> {
         const stats = await fs.promises.lstat(filePath);
 
         if (stats.isDirectory()) {
-            // Verificación adicional de seguridad para subdirectorios
+            // Additional security check for subdirectories
             const dirName = path.basename(filePath);
             if (this.PROTECTED_FOLDERS.includes(dirName)) {
-                console.warn(`Omitiendo carpeta protegida: ${filePath}`);
+                console.warn(`Skipping protected folder: ${filePath}`);
                 return;
             }
             await rimrafAsync(filePath);
-            console.log(`Subdirectorio eliminado: ${filePath}`);
+            console.log(`Subdirectory removed: ${filePath}`);
         } else {
             await fs.promises.unlink(filePath);
-            console.log(`Archivo eliminado: ${filePath}`);
+            console.log(`File removed: ${filePath}`);
         }
     }
 }

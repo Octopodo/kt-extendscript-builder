@@ -15,7 +15,7 @@ describe('ConfigLoader', () => {
         expect(config).toBeDefined();
         expect(config).toEqual(userConfig);
     });
-    it("shouldn't break with no path", () => {
+    it('should not break with no path', () => {
         const config = loader.load();
         expect(config).toBeDefined();
         expect(config).toEqual({});

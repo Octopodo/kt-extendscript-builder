@@ -6,25 +6,25 @@ import { BuildOptions } from '../../src/types';
 import { mkdir, writeFile, rm } from 'fs/promises';
 
 describe('Cleaner', () => {
-    // Directorio temporal para pruebas
+    // Temporary directory for tests
     const tempDir = path.resolve(process.cwd(), 'tests/fixtures/temp-cleaner-tests');
     let options: Partial<BuildOptions>;
 
-    // Guarda mensajes de consola para revisarlos después
+    // Save console messages for later review
     let consoleMessages = {
         logs: [] as string[],
         warnings: [] as string[],
         errors: [] as string[]
     };
 
-    // Funciones originales de consola
+    // Original console functions
     const originalConsole = {
         log: console.log,
         warn: console.warn,
         error: console.error
     };
 
-    // Función auxiliar para crear archivos y directorios
+    // Helper function to create files and directories
     async function createTestFile(filePath: string, content: string = 'test content'): Promise<void> {
         const dir = path.dirname(filePath);
         await mkdir(dir, { recursive: true });
@@ -32,10 +32,10 @@ describe('Cleaner', () => {
     }
 
     beforeEach(async () => {
-        // Limpiar mensajes de consola anteriores
+        // Clear previous console messages
         consoleMessages = { logs: [], warnings: [], errors: [] };
 
-        // Sobreescribir temporalmente console para capturar mensajes
+        // Temporarily override console to capture messages
         console.log = (message: string) => {
             consoleMessages.logs.push(message);
         };
@@ -46,91 +46,106 @@ describe('Cleaner', () => {
             consoleMessages.errors.push(message);
         };
 
-        // Crear directorio temporal para pruebas
+        // Create temporary directory for tests
         await mkdir(tempDir, { recursive: true });
 
-        // Crear estructura básica para pruebas
+        // Create basic structure for tests
         await createTestFile(path.join(tempDir, 'index.js'));
         await createTestFile(path.join(tempDir, 'index.js.map'));
         await mkdir(path.join(tempDir, 'subfolder'), { recursive: true });
         await createTestFile(path.join(tempDir, 'subfolder', 'test.js'));
 
-        // Opciones por defecto
+        // Default options
         options = {
             output: path.join(tempDir, 'index.js')
         };
     });
 
     afterEach(async () => {
-        // Restaurar funciones originales de console
+        // Restore original console functions
         console.log = originalConsole.log;
         console.warn = originalConsole.warn;
         console.error = originalConsole.error;
 
-        // Limpiar directorio temporal
+        // Clean temporary directory
         try {
             await rm(tempDir, { recursive: true, force: true });
         } catch (err) {
-            originalConsole.error('Error limpiando el directorio temporal:', err);
+            originalConsole.error('Error cleaning temporary directory:', err);
         }
     });
 
-    it('no debería limpiar cuando no se especifica output', async () => {
-        // Preparar
+    it('should not clean when output is not specified', async () => {
+        // Prepare
         options.output = undefined;
 
-        // Ejecutar
+        // Execute
         await Cleaner.cleanDist(options);
 
-        // Verificar
-        expect(consoleMessages.warnings.some((m) => m.includes('No se especificó un archivo'))).toBe(true);
+        // Verify
+        expect(consoleMessages.warnings.some((m) => m.includes('No output file specified'))).toBe(true);
     });
 
-    it('debería limpiar un archivo específico cuando existe', async () => {
-        // Preparar
+    it('should clean a specific file when it exists', async () => {
+        // Prepare
         const targetFile = path.join(tempDir, 'index.js');
         options.output = targetFile;
 
-        // Verificar que el archivo existe antes de limpiar
+        // Verify that the file exists before cleaning
         expect(fs.existsSync(targetFile)).toBe(true);
 
-        // Ejecutar
+        // Execute
         await Cleaner.cleanDist(options);
 
-        // Verificar
+        // Verify
         expect(fs.existsSync(targetFile)).toBe(false);
         expect(fs.existsSync(path.join(tempDir, 'index.js.map'))).toBe(true);
-        expect(consoleMessages.logs.some((m) => m.includes('Archivo limpiado'))).toBe(true);
+        expect(consoleMessages.logs.some((m) => m.includes('File cleaned'))).toBe(true);
     });
 
-    it('no debería limpiar directorios protegidos', async () => {
-        // Preparar - crear un directorio protegido
+    it('should  not clean all files in the directory when the specific file does not exist', async () => {
+        // Prepare
+        options.output = path.join(tempDir, 'non-existent-file.js');
+
+        // Execute
+        await Cleaner.cleanDist(options);
+
+        // Verify
+        expect(fs.existsSync(tempDir)).toBe(true);
+        const remainingFiles = await fs.promises.readdir(tempDir);
+        expect(remainingFiles.length).toBe(3);
+        expect(consoleMessages.logs.some((m) => m.includes('Directory cleaned'))).toBe(false);
+    });
+
+    it('should not clean protected directories', async () => {
+        // Prepare - create a protected directory
         const srcDir = path.join(tempDir, 'src');
         await mkdir(srcDir, { recursive: true });
         await createTestFile(path.join(srcDir, 'test.js'));
 
         options.output = srcDir;
 
-        // Ejecutar
+        // Execute
         await Cleaner.cleanDist(options);
 
-        // Verificar
+        // Verify
         expect(fs.existsSync(srcDir)).toBe(true);
         expect(fs.existsSync(path.join(srcDir, 'test.js'))).toBe(true);
-        expect(consoleMessages.errors.some((m) => m.includes('directorio protegido'))).toBe(true);
+        expect(consoleMessages.errors.some((m) => m.includes('protected project directory'))).toBe(true);
     });
 
-    it('debería omitir carpetas protegidas durante la limpieza', async () => {
-        // Preparar - crear una subcarpeta protegida
+    it('should skip protected folders during cleaning', async () => {
+        // Prepare - create a protected subfolder
         const nodeModulesDir = path.join(tempDir, 'node_modules');
         await mkdir(nodeModulesDir, { recursive: true });
         await createTestFile(path.join(nodeModulesDir, 'package.js'));
 
-        options.output = path.join(tempDir, 'package.js');
+        options.output = path.join(tempDir, 'non-existent-file.js');
 
-        // Ejecutar
+        // Execute
         await Cleaner.cleanDist(options);
 
+        // Verify
         expect(fs.existsSync(nodeModulesDir)).toBe(true);
         expect(fs.existsSync(path.join(nodeModulesDir, 'package.js'))).toBe(true);
     });

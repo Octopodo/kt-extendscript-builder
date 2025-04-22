@@ -39,15 +39,15 @@ export class OptionsParser {
     }
 
     /**
-     * Extrae los comandos (argumentos posicionales que no empiezan con - o --) de process.argv
+     * Extracts commands (positional arguments that don't start with - or --) from process.argv
      *
-     * @returns Un array con los nombres de comandos encontrados
+     * @returns An array with the names of the commands found
      */
     static extractCommands(): string[] {
         const userArgs = hideBin(process.argv);
         const commands: string[] = [];
 
-        // Considerar argumentos que no empiezan con '-' o '--' como posibles comandos
+        // Consider arguments that don't start with '-' or '--' as possible commands
         for (const arg of userArgs) {
             if (!arg.startsWith('-') && !arg.startsWith('--')) {
                 commands.push(arg);

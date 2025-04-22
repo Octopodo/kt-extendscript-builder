@@ -16,7 +16,7 @@ describe('OptionsRuleResolver', () => {
         expect(options).toBeInstanceOf(Object);
     });
 
-    it("shouldn't modify the base options object", () => {
+    it('should not modify the base options object', () => {
         const baseOptions = OptionsParser.parse();
         process.argv = ['node', 'script.js', '--input', 'custom/input.ts'];
         const optionsCopy = OptionsParser.parse();

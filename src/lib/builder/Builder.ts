@@ -7,8 +7,8 @@ import { defineConfig } from 'vite';
 import { Cleaner } from './Cleaner';
 import { OptionsParser } from '../options/OptionsParser';
 /**
- * Clase principal del sistema de construcción.
- * Coordina el proceso de construcción con una estructura simple y clara.
+ * Main class of the build system.
+ * Coordinates the build process with a simple and clear structure.
  */
 export class Builder {
     private options: Partial<BuildOptions> = {};
@@ -20,28 +20,28 @@ export class Builder {
     }
 
     /**
-     * Ejecuta el proceso de construcción con las opciones configuradas
-     * Este método ejecuta el proceso completo de limpieza-construcción-limpieza
+     * Executes the build process with the configured options
+     * This method executes the complete clean-build-clean process
      */
     async build(command?: string): Promise<void> {
-        // Si no se han configurado opciones, lo hacemos automáticamente
+        // If no options have been configured, we do it automatically
         if (Object.keys(this.options).length === 0) {
             this.options = this.optionsResolver.resolve(command);
         }
 
         try {
-            // 1. Limpieza inicial si es necesario
+            // 1. Initial cleanup if needed
             await this.cleanIfNeeded('before');
 
-            // 2. Construir solo si no es un comando de limpieza exclusivo
+            // 2. Build only if it's not an exclusive cleaning command
             const isCleanOnly = process.argv.includes('clean-only');
             if (!isCleanOnly) {
-                // Configurar Vite y Rollup
+                // Configure Vite and Rollup
                 const viteConfig = createViteConfig(this.options);
                 viteConfig.extendScriptConfig = createRollupConfig(this.options);
                 this.viteConfig = defineConfig(viteConfig);
 
-                // Ejecutar build o watch según la configuración
+                // Run build or watch according to configuration
                 if (this.options.watch) {
                     await this.viteConfig.extendScriptConfig.watch();
                 } else {
@@ -49,17 +49,17 @@ export class Builder {
                 }
             }
 
-            // 3. Limpieza final si es necesario
+            // 3. Final cleanup if needed
             await this.cleanIfNeeded('after');
         } catch (error) {
-            console.error('Error durante el proceso de construcción:', error);
+            console.error('Error during build process:', error);
             throw error;
         }
     }
 
     /**
-     * Método de conveniencia que combina configuración y construcción
-     * Para mantener compatibilidad con código existente
+     * Convenience method that combines configuration and build
+     * To maintain compatibility with existing code
      */
     async run(): Promise<void> {
         const commands = OptionsParser.extractCommands();
@@ -72,12 +72,12 @@ export class Builder {
     }
 
     /**
-     * Determina si se debe limpiar el directorio según las opciones
+     * Determines if the directory should be cleaned based on the options
      */
     private shouldClean(stage: 'before' | 'after'): boolean {
         if (!this.options.clean) return false;
 
-        // Si es un string, convertir a array para procesamiento uniforme
+        // If it's a string, convert to array for uniform processing
         const cleanOption =
             typeof this.options.clean === 'string'
                 ? [this.options.clean]
@@ -85,19 +85,19 @@ export class Builder {
                 ? this.options.clean
                 : [];
 
-        // Si se especificó 'false', no limpiar nada
+        // If 'false' was specified, don't clean anything
         if (cleanOption.includes('false')) return false;
 
-        // Limpiar si se especificó 'both' o la etapa específica
+        // Clean if 'both' or the specific stage was specified
         return cleanOption.includes('both') || cleanOption.includes(stage);
     }
 
     /**
-     * Limpia el directorio de salida si es necesario según la configuración
+     * Cleans the output directory if necessary according to the configuration
      */
     private async cleanIfNeeded(stage: 'before' | 'after'): Promise<void> {
         if (this.shouldClean(stage)) {
-            console.log(`Iniciando limpieza (${stage})...`);
+            console.log(`Starting cleanup (${stage})...`);
             await Cleaner.cleanDist(this.options);
         }
     }
