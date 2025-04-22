@@ -22,7 +22,19 @@ export class Cleaner {
             return;
         }
 
-        const distPath = path.dirname(options.output as string);
+        if (!fs.existsSync(options.output as string)) {
+            console.warn(`El archivo de salida ${options.output} no existe. No se realizará la limpieza.`);
+            return;
+        }
+        const stat = fs.lstatSync(options.output as string);
+        const isFile = stat.isFile();
+        const isDirectory = stat.isDirectory();
+
+        const distPath = isFile
+            ? path.dirname(options.output as string)
+            : isDirectory
+            ? path.resolve(options.output as string)
+            : '';
 
         if (!this.validateDistPath(distPath)) {
             return;
