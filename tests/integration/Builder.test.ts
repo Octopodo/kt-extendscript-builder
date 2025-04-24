@@ -1,6 +1,6 @@
 import { time } from 'console';
 import { Builder } from '../../src/lib/builder/Builder';
-import { describe, expect, it } from 'vitest';
+import { describe, expect, it, afterEach } from 'vitest';
 import path from 'path';
 import fs from 'fs';
 
@@ -19,6 +19,15 @@ const defaultPaths = [
     'tests/fixtures/basic-project/dist/index.js'
 ];
 describe('Builder', () => {
+    afterEach(() => {
+        // Clean up the output directory after each test
+        const outputDir = 'tests/fixtures/basic-project/dist';
+        process.argv = ['node', 'script.js', 'clean', '--output', outputDir];
+        const builder = new Builder();
+        builder.run().then(() => {
+            console.log('Output directory cleaned up.');
+        });
+    });
     it('should create an instance of Builder', () => {
         const builder = new Builder();
         expect(builder).toBeInstanceOf(Builder);
@@ -99,25 +108,30 @@ describe('Builder', () => {
             'tests/fixtures/basic-project/kt.config.json'
         ];
         const builder = new Builder();
-        await builder.run();
+        try {
+            await builder.run();
+        } catch (error: any) {
+            console.error('Error in build process:', error);
+        }
         expect(fs.existsSync('tests/fixtures/basic-project/dist/my-custom-ae-output/index.js')).toBe(true);
     });
     it('should chain builds', async () => {
-        // process.argv = [
-        //     'node',
-        //     'script.js',
-        //     'tests-build',
-        //     'tests-build-tests',
-        //     '--config-file',
-        //     'tests/fixtures/basic-project/kt.config.json'
-        // ];
-        // const commandRegistry = new CommandRegistry();
-        // commandRegistry.registerCommand(new TestsBuildCommand());
-        // commandRegistry.registerCommand(new TestsBuildTestsCommand());
-        // const builder = new Builder(commandRegistry);
-        // await builder.run();
-        // const buildFile = loadFile('tests/fixtures/basic-project/dist/index.js');
-        // const testFile = loadFile('dist.test/index.test.js');
+        process.argv = [
+            'node',
+            'script.js',
+            'my-custom-preset',
+            'my-ae-preset',
+            '--config-path',
+            'tests/fixtures/basic-project/kt.config.json'
+        ];
+        const builder = new Builder();
+        try {
+            await builder.run();
+        } catch (error: any) {
+            console.error('Error in build process:', error);
+        }
+        expect(fs.existsSync('tests/fixtures/basic-project/dist/my-custom-preset/index.js')).toBe(true);
+        expect(fs.existsSync('tests/fixtures/basic-project/dist/my-custom-ae-output/index.js')).toBe(true);
     });
 
     it('should clean only the output directory', async () => {

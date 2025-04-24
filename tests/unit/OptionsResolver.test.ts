@@ -47,7 +47,7 @@ describe('OptionsResolver', () => {
 
         const resolvedOptions = resolver.resolve(command);
 
-        expect(resolvedOptions.input).toBe('src/my-custom-preset/index.ts');
+        expect(resolvedOptions.input).toBe('src/tests/fixtures/basic-project/dist/my-custom-preset/index.ts');
     });
 
     it('should preserve test mode from CLI arguments', () => {

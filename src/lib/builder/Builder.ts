@@ -68,6 +68,7 @@ export class Builder {
         }
         for (const command of commands) {
             await this.build(command);
+            this.resetOptions();
         }
     }
 
@@ -100,5 +101,11 @@ export class Builder {
             console.log(`Starting cleanup (${stage})...`);
             await Cleaner.cleanDist(this.options);
         }
+    }
+
+    private resetOptions(): void {
+        this.options = {};
+        this.viteConfig = {} as ExtendedViteConfig;
+        this.optionsResolver = new OptionsResolver();
     }
 }
