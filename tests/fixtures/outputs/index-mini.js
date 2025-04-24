@@ -28,5 +28,4 @@ KT.init();
 var TestBuilder=/*#__PURE__*/function(){function TestBuilder(version){_defineProperty(this,"version",void 0);this.version=version;JSON.stringify({});new KT;}var _proto=TestBuilder.prototype;_proto.salute=function salute(){$.writeln("Hello from TestBuilder "+this.version);};return TestBuilder}();
 
 var testBuilder=new TestBuilder("1.0.0");testBuilder.salute();
-thisObj.KT = KT;
 })(this);

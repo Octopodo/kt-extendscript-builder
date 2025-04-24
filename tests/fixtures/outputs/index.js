@@ -65,5 +65,4 @@ var TestBuilder = /*#__PURE__*/function () {
 
 var testBuilder = new TestBuilder('1.0.0');
 testBuilder.salute();
-thisObj.KT = KT;
 })(this);
