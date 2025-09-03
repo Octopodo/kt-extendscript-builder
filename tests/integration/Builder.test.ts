@@ -19,15 +19,15 @@ const defaultPaths = [
     'tests/fixtures/basic-project/dist/index.js'
 ];
 describe('Builder', () => {
-    afterEach(() => {
-        // Clean up the output directory after each test
-        const outputDir = 'tests/fixtures/basic-project/dist';
-        process.argv = ['node', 'script.js', 'clean', '--output', outputDir];
-        const builder = new Builder();
-        builder.run().then(() => {
-            console.log('Output directory cleaned up.');
-        });
-    });
+    // afterEach(() => {
+    //     // Clean up the output directory after each test
+    //     const outputDir = 'tests/fixtures/basic-project/dist';
+    //     process.argv = ['node', 'script.js', 'clean', '--output', outputDir];
+    //     const builder = new Builder();
+    //     builder.run().then(() => {
+    //         console.log('Output directory cleaned up.');
+    //     });
+    // });
     it('should create an instance of Builder', () => {
         const builder = new Builder();
         expect(builder).toBeInstanceOf(Builder);
@@ -62,7 +62,7 @@ describe('Builder', () => {
             'node',
             'script.js',
             '--input',
-            'tests/fixtures/basic-project/src/index.ts',
+            'tests/fixtures/basic-project/src/underscore.ts',
             '--minify',
             'true',
             '--output',
@@ -83,7 +83,7 @@ describe('Builder', () => {
             'node',
             'script.js',
             '--input',
-            'tests/fixtures/basic-project/src/index.ts',
+            'tests/fixtures/basic-project/src/underscore.ts',
             '--uglify',
             'true',
             '--output',

@@ -8,6 +8,7 @@ import json from '@rollup/plugin-json';
 import terser from '@rollup/plugin-terser';
 import { basePonyfills } from '../ponyfills/basePonyfills';
 import { rollupRemoveExports } from '../plugins/rollupRemoveExports';
+import commonjs from '@rollup/plugin-commonjs';
 
 export function createRollupConfig(options: Partial<BuildOptions> = {}) {
     const input = options.input as string;
@@ -24,9 +25,25 @@ export function createRollupConfig(options: Partial<BuildOptions> = {}) {
             terser({
                 compress: {
                     conditionals: false,
-                    drop_console: options.mode === 'production'
+                    // drop_console: options.mode === 'production',
+                    inline: false
                 },
-                output: { comments: false }
+                // format: {
+                //     comments: false,
+                //     braces: true,
+                //     semicolons: true
+                // }
+                // parse: {
+                //     bare_returns: true,
+                //     html5_comments: false,
+                //     shebang: false
+                // },
+                output: {
+                    comments: false,
+                    semicolons: true,
+                    braces: true
+                }
+                // ie8: true
             })
         );
     }
@@ -41,11 +58,17 @@ export function createRollupConfig(options: Partial<BuildOptions> = {}) {
         plugins: [
             json(),
             nodeResolve({
-                extensions
+                extensions,
+                preferBuiltins: false
+            }),
+            commonjs({
+                include: /node_modules/,
+                transformMixedEsModules: true
             }),
             babel({
                 extensions,
                 minified: options.minify,
+
                 babelrc: false,
                 babelHelpers: 'bundled',
                 presets: [
@@ -55,7 +78,8 @@ export function createRollupConfig(options: Partial<BuildOptions> = {}) {
                             targets: {
                                 esmodules: 'commonjs',
                                 ie: '9'
-                            }
+                            },
+                            modules: false
                         }
                     ],
                     '@babel/preset-typescript'

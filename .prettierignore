@@ -1,2 +1,3 @@
 tests/fixtures/outputs
+tests/fixtures/basic-project/src/underscore.ts
 tests/fixtures/dist

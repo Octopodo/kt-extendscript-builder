@@ -1,5 +1,4 @@
 import { KT } from 'kt-core';
-
 export class TestBuilder {
     private version: string;
 
