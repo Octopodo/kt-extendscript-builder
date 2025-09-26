@@ -41,13 +41,12 @@ describe('OptionsResolver', () => {
             '--config-file',
             'tests/fixtures/basic-project/kt.config.json'
         ];
-        const configFileArgs = {
-            input: 'config-input.ts'
-        };
 
         const resolvedOptions = resolver.resolve(command);
 
-        expect(resolvedOptions.input).toBe('src/tests/fixtures/basic-project/dist/my-custom-preset/index.ts');
+        // El valor de 'input' en kt.config.json para 'my-custom-preset' es 'tests/fixtures/basic-project/src/index.ts'
+        // Debe tener prioridad sobre el valor CLI 'cli-input.ts'
+        expect(resolvedOptions.input).toBe('tests/fixtures/basic-project/src/index.ts');
     });
 
     it('should preserve test mode from CLI arguments', () => {

@@ -2,35 +2,40 @@ import { describe, expect, it } from 'vitest';
 import { getAdobeAppVersions } from '../../src/lib/utils/getAdobeAppVersions';
 
 const afterEffectsVersions = [
-    '10.5',
-    '11.0',
-    '12.0',
-    '13.0',
-    '13.1',
-    '13.2',
-    '13.6',
-    '13.8',
-    '14.0',
-    '14.2',
-    '15.0',
-    '16.0',
-    '16.1',
-    '17.0',
-    '17.1',
-    '18.0',
-    '22.0',
-    '22.3',
-    '22.6',
-    '23.0',
-    '8.0',
-    '9.0'
+    "10.5",
+  "11.0",
+  "12.0",
+  "13.0",
+  "13.1",
+  "13.2",
+  "13.6",
+  "13.8",
+  "14.0",
+  "14.2",
+  "15.0",
+  "16.0",
+  "16.1",
+  "17.0",
+  "17.1",
+  "18.0",
+  "22.0",
+  "22.3",
+  "22.6",
+  "23.0",
+  "24.0",
+  "24.2",
+  "24.3",
+  "24.5",
+  "24.6",
+  "8.0",
+  "9.0",
 ];
 const animateVersions = ['13.0', '22.0'];
 const auditionVersions = ['2015.2', '2017', '2018'];
 const illustratorVersions = ['2015.3', '2022'];
-const inDesignVersions = ['2015.3', '2018', '2021'];
+const inDesignVersions = ['2015.3', '2018', '2021', "2022","2023",];
 const photoshopVersions = ['2015.5'];
-const premiereVersions = ['11.0', '12.0', '13.0', '14.0', '15.0'];
+const premiereVersions = ['11.0', '12.0', '13.0', '14.0', '15.0', '24.0'];
 
 describe('getAdobeAppVersions', () => {
     it('should return all apps', () => {

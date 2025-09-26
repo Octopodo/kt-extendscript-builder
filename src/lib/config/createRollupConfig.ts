@@ -8,13 +8,15 @@ import json from '@rollup/plugin-json';
 import terser from '@rollup/plugin-terser';
 import { basePonyfills } from '../ponyfills/basePonyfills';
 import { rollupRemoveExports } from '../plugins/rollupRemoveExports';
+import fs from 'fs';
+import path from 'path';
 
 export function createRollupConfig(options: Partial<BuildOptions> = {}) {
     const input = options.input as string;
     const output = options.output as string;
     const extensions = ['.js', '.ts', '.tsx'];
     const ponyfillCollector = new PonyfillCollector();
-    const ponyfills = [...ponyfillCollector.collect(options.ponyfills), ...basePonyfills];
+    const ponyfills = ponyfillCollector.collect(options.ponyfills);
     const GLOBAL_THIS = 'thisObj';
     console.log(`Configuring Rollup for ExtendScript: ${input} -> ${output}`);
 
@@ -34,14 +36,15 @@ export function createRollupConfig(options: Partial<BuildOptions> = {}) {
         input: input,
         treeshake: true,
         output: {
-            file: output
+            file: output,
+            // format: 'cjs'
         },
 
-        external: [],
         plugins: [
             json(),
             nodeResolve({
-                extensions
+                extensions,
+                preferBuiltins: false
             }),
             babel({
                 extensions,
@@ -78,6 +81,12 @@ export function createRollupConfig(options: Partial<BuildOptions> = {}) {
 
     async function build() {
         try {
+            // Ensure output directory exists
+            const outputDir = path.dirname(output);
+            if (!fs.existsSync(outputDir)) {
+                fs.mkdirSync(outputDir, { recursive: true });
+            }
+            
             const bundle = await rollup(config);
             await bundle.write(config.output as OutputOptions);
             await bundle.close();

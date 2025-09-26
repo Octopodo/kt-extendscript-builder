@@ -33,6 +33,7 @@
         "@rollup/plugin-json": "^6.0.0",
         "@rollup/plugin-node-resolve": "^15.0.0",
         "@rollup/plugin-terser": "^0.4.4",
+        "kt-core": "^1.0.6",
         "rimraf": "^3.0.2",
         "rollup": "^2.79.1",
         "types-for-adobe": "^7.2.2",
